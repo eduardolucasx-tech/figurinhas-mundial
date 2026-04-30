@@ -305,12 +305,12 @@ function renderAlbum(){
   $('#albumScanBtn')?.addEventListener('click', openScanner);
   $('#albumShowMissing').addEventListener('click', () => { $('#statusFilter').value='missing'; updateFilterChips(); sync(); });
   $('#albumShowDup').addEventListener('click', () => { $('#statusFilter').value='duplicate'; updateFilterChips(); sync(); });
-  $('.chip').forEach(btn => btn.addEventListener('click', () => { $('#statusFilter').value = btn.dataset.chip; updateFilterChips(); sync(); }));
+  $$('.chip').forEach(btn => btn.addEventListener('click', () => { $('#statusFilter').value = btn.dataset.chip; updateFilterChips(); sync(); }));
   renderTeamList();
 }
 function updateFilterChips(){
   const value = $('#statusFilter')?.value || '';
-  $('.chip').forEach(btn => btn.classList.toggle('active', btn.dataset.chip === value));
+  $$('.chip').forEach(btn => btn.classList.toggle('active', btn.dataset.chip === value));
 }
 function renderTeamList(){
   const q = ($('#searchInput')?.value || '').trim().toLowerCase();
@@ -564,20 +564,31 @@ function renderQuickResults(){
 function openQuickAdd(){ $('#markDialog').showModal(); $('#markSearch').value=''; renderQuickResults(); setTimeout(() => $('#markSearch').focus(), 30); }
 
 // v0.4 - Scanner de código de figurinha (processamento local, sem armazenamento de imagens)
-let scanner = { stream:null, timer:null, interval:null, active:false, endsAt:0, lastText:'', candidates:[] };
+let scanner = { stream:null, timer:null, interval:null, active:false, endsAt:0, lastText:'', candidates:[], scanCount:0 };
 function renderScanner(){
   const active = scanner.active;
   const remaining = active ? Math.max(0, Math.ceil((scanner.endsAt - Date.now()) / 1000)) : 10;
   $('#scanner').innerHTML = `
-    <div class="scanner-layout">
-      <div class="card scanner-card">
+    <div class="scanner-layout scanner-layout-v05">
+      <div class="card scanner-card scanner-main-card">
         <span class="label">Scanner mobile</span>
         <h3>Escanear código da figurinha</h3>
-        <p>A câmera será usada por no máximo <strong>10 segundos</strong> para tentar ler códigos como <strong>BRA 10</strong>, <strong>ARG 07</strong> ou <strong>SED 05</strong>.</p>
+        <p>Centralize o verso da figurinha e coloque a cápsula do código no guia superior direito. A leitura dura no máximo <strong>10 segundos</strong>.</p>
         <div class="privacy-note">🔒 Processamento local: nenhuma imagem ou vídeo é salvo, enviado para a nuvem, Firebase ou Vercel. Só o código confirmado vira dado da coleção.</div>
-        <div class="scanner-stage ${active ? 'active' : ''}">
+        <div class="scanner-stage scanner-v05 ${active ? 'active' : 'idle'}">
           <video id="scannerVideo" playsinline muted></video>
-          <div class="scanner-overlay"><span>Aponte para o código</span></div>
+          <div class="scanner-shade"></div>
+          <div class="scanner-frame" aria-hidden="true">
+            <span class="scan-corner tl"></span><span class="scan-corner tr"></span><span class="scan-corner bl"></span><span class="scan-corner br"></span>
+            <div class="sticker-guide">
+              <div class="sticker-lines side"></div>
+              <div class="sticker-symbol"></div>
+              <div class="sticker-lines bottom"></div>
+              <div class="code-guide"><span>Alinhe o código aqui</span></div>
+            </div>
+          </div>
+          <div class="scanner-tip">Centralize o verso da figurinha</div>
+          <div class="scanner-time">Leitura em até ${remaining}s</div>
         </div>
         <canvas id="scannerCanvas" hidden></canvas>
         <div class="scanner-status" id="scannerStatus">${active ? `Escaneando... ${remaining}s` : 'Pronto para iniciar.'}</div>
@@ -586,15 +597,23 @@ function renderScanner(){
           <button class="ghost" id="stopScanner" ${active ? '' : 'disabled'}>Parar câmera</button>
         </div>
       </div>
-      <div class="card scanner-card">
-        <span class="label">Plano B rápido</span>
-        <h3>Digitar código manualmente</h3>
-        <p>Se a câmera não ler bem por reflexo ou movimento, digite o código e adicione +1.</p>
-        <div class="scanner-manual">
-          <input id="manualScanCode" placeholder="Ex: BRA 10" value="${escapeAttr(scanner.lastText || '')}" />
-          <button class="primary" id="manualScanBtn">Buscar</button>
+      <div class="scanner-side-stack">
+        <div class="card scanner-card">
+          <span class="label">Plano B rápido</span>
+          <h3>Digitar código manualmente</h3>
+          <p>Se a câmera não ler bem por reflexo ou movimento, digite o código e adicione +1.</p>
+          <div class="scanner-manual">
+            <input id="manualScanCode" placeholder="Ex: HAI 8, BRA 10" value="${escapeAttr(scanner.lastText || '')}" />
+            <button class="primary" id="manualScanBtn">Buscar</button>
+          </div>
+          <div id="scannerResult" class="scanner-results"></div>
         </div>
-        <div id="scannerResult" class="scanner-results"></div>
+        <div class="card scanner-card scanner-guide-card">
+          <span class="label">Gabarito visual</span>
+          <h3>Como posicionar</h3>
+          <p>O código normalmente fica no canto superior direito do verso. Mantenha essa área dentro da moldura pontilhada.</p>
+          <img src="scanner-guide.png" alt="Gabarito visual para alinhar o código da figurinha no scanner" loading="lazy" />
+        </div>
       </div>
     </div>`;
   $('#startScanner')?.addEventListener('click', startScanner);
@@ -613,6 +632,7 @@ async function startScanner(){
     scanner.active = true;
     scanner.endsAt = Date.now() + 10000;
     scanner.candidates = [];
+    scanner.scanCount = 0;
     renderScanner();
     attachStreamToVideo();
     scanner.timer = setTimeout(() => finishScannerTimeout(), 10000);
@@ -652,16 +672,37 @@ async function scanFrameOnce(){
   const video = $('#scannerVideo'); const canvas = $('#scannerCanvas');
   if (!video || !canvas || !video.videoWidth) return;
   scanner.recognizing = true;
+  scanner.scanCount = (scanner.scanCount || 0) + 1;
   try {
     const w = Math.min(960, video.videoWidth); const h = Math.round(video.videoHeight * (w / video.videoWidth));
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d', { willReadFrequently:true });
     ctx.drawImage(video, 0, 0, w, h);
-    setScannerStatus('Lendo código localmente...');
-    const result = await Tesseract.recognize(canvas, 'eng');
-    const text = result?.data?.text || '';
-    scanner.lastText = text.trim().slice(0, 120);
-    const candidates = findStickerCandidates(text);
+    setScannerStatus('Lendo a área do código localmente...');
+
+    // Primeiro tenta ler só onde o código costuma ficar: canto superior direito do verso.
+    const roi = document.createElement('canvas');
+    const rw = Math.round(w * 0.38), rh = Math.round(h * 0.20);
+    const rx = Math.round(w * 0.50), ry = Math.round(h * 0.21);
+    roi.width = rw; roi.height = rh;
+    const rctx = roi.getContext('2d', { willReadFrequently:true });
+    rctx.drawImage(canvas, rx, ry, rw, rh, 0, 0, rw, rh);
+    rctx.filter = 'contrast(150%) grayscale(100%)';
+    rctx.drawImage(roi, 0, 0);
+
+    let result = await Tesseract.recognize(roi, 'eng');
+    let text = result?.data?.text || '';
+    let candidates = findStickerCandidates(text);
+
+    // Fallback no quadro completo a cada duas tentativas.
+    if (!candidates.length && scanner.scanCount % 2 === 0) {
+      setScannerStatus('Tentando no quadro completo...');
+      result = await Tesseract.recognize(canvas, 'eng');
+      text += ' ' + (result?.data?.text || '');
+      candidates = findStickerCandidates(text);
+    }
+
+    scanner.lastText = text.trim().slice(0, 160);
     if (candidates.length) {
       scanner.candidates = candidates;
       stopScanner(false);
@@ -670,7 +711,7 @@ async function scanFrameOnce(){
       toast('Código detectado. Confirme a figurinha.');
     } else if (scanner.active) {
       const remaining = Math.max(0, Math.ceil((scanner.endsAt - Date.now()) / 1000));
-      setScannerStatus(`Ainda não encontrei. Tentando novamente... ${remaining}s`);
+      setScannerStatus(`Ainda não encontrei. Alinhe o código no canto superior direito... ${remaining}s`);
     }
   } catch(e){
     console.warn(e);
@@ -687,10 +728,10 @@ function findStickerCandidates(raw){
   const text = String(raw || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
   const compact = text.replace(/[^A-Z0-9]+/g,' ');
   const matches = [];
-  const patterns = [/[\b\s]([A-Z]{3})\s*(\d{1,2})[\b\s]/g, /^([A-Z]{3})\s*(\d{1,2})$/g];
+  const source = ` ${compact} `;
+  const patterns = [/\b([A-Z]{3})\s*(\d{1,2})\b/g, /\b([A-Z]{3})\s*-\s*(\d{1,2})\b/g];
   for (const re of patterns) {
     let m;
-    const source = ` ${compact} `;
     while ((m = re.exec(source)) !== null) {
       const code = m[1]; const num = Number(m[2]);
       if (!num || num > 99) continue;

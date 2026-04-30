@@ -19,7 +19,7 @@ Suba os arquivos na branch `main` do GitHub. A Vercel publica automaticamente.
 ## Firebase
 A configuração fica em `firebase-config.js`. A segurança fica nas regras do Firestore.
 
-## v0.4 - Scanner mobile
+## v0.5 - Scanner mobile
 
 Esta versão une a v0.3 com uma tela **Escanear**:
 
@@ -31,3 +31,11 @@ Esta versão une a v0.3 com uma tela **Escanear**:
 - mantém digitação manual como fallback caso a câmera/OCR falhe.
 
 Observação: a leitura por câmera depende de luz, foco, reflexo e da qualidade do texto impresso na figurinha. A confirmação manual é obrigatória antes de adicionar.
+
+
+## v0.5
+
+- Corrige a tela Álbum para voltar a mostrar os cards das seleções diretamente.
+- Adiciona gabarito visual do scanner com moldura fina e área de leitura no canto superior direito.
+- Scanner tenta primeiro a região do código para melhorar a leitura OCR.
+- Mantém limite de câmera em 10 segundos e sem armazenamento de imagens/vídeos.
