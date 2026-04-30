@@ -1,6 +1,6 @@
 window.ALBUM_DATA = {
   appName: 'Checklist Mundial',
-  version: '0.2.0',
+  version: '0.4.0-scanner',
   teams: [
     {group:'A', code:'MEX', name:'México'}, {group:'A', code:'RSA', name:'África do Sul'}, {group:'A', code:'KOR', name:'Coreia do Sul'}, {group:'A', code:'CZE', name:'República Tcheca'},
     {group:'B', code:'CAN', name:'Canadá'}, {group:'B', code:'QAT', name:'Qatar'}, {group:'B', code:'SUI', name:'Suíça'}, {group:'B', code:'BIH', name:'Bósnia'},

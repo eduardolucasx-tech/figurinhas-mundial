@@ -1,32 +1,33 @@
-# Checklist Mundial v0.2
+# Checklist Mundial v0.3
 
-App/PWA para controle de figurinhas do álbum, com login Google e sincronização por usuário via Firebase/Firestore.
+App/PWA para controlar álbum de figurinhas com login Google e sincronização via Firebase/Firestore.
 
-## Novidades da v0.2
+## Novidades da v0.3
+- O app agora abre direto na aba **Álbum**.
+- O antigo Dashboard virou **Resumo**.
+- Navegação mais simples: Álbum, Buscar, Trocas, Mapa, Resumo e Conta.
+- Cabeçalho do álbum com progresso rápido, faltantes, repetidas e total físico.
+- Filtros rápidos por status: todas, faltantes, tenho, repetidas e trocas.
+- Cards de seleção mais visuais, com progresso, faltantes, repetidas e quantidade física.
+- Botão flutuante de marcação rápida no celular.
+- Ajustes de layout mobile-first.
+- Mantém sync automático por padrão, quantidades ilimitadas e controle de repetidas.
 
-- Sincronização automática por padrão.
-- Remoção da confusão entre “Salvar na nuvem” e “Carregar da nuvem”.
-- Botão único: **Sincronizar agora**.
-- Status visual de sincronização no topo.
-- “Cromo” trocado por **figurinha** no app.
-- Quantidade ilimitada por figurinha.
-- Repetidas calculadas como `quantidade - 1`.
-- Cards coloridos por status: falta, tenho, repetida e troca/reserva.
-- Botões `+` e `-` para controle rápido do acervo.
-- Tela de trocas com cópia de faltantes e repetidas.
-- Histórico de alterações e botão desfazer.
-- Layout mais mobile-first com navegação inferior no celular.
+## Deploy
+Suba os arquivos na branch `main` do GitHub. A Vercel publica automaticamente.
 
-## Firestore Rules recomendadas
+## Firebase
+A configuração fica em `firebase-config.js`. A segurança fica nas regras do Firestore.
 
-```js
-rules_version = '2';
+## v0.4 - Scanner mobile
 
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /checklist_mundial_users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
+Esta versão une a v0.3 com uma tela **Escanear**:
+
+- usa a câmera por no máximo 10 segundos;
+- tenta ler códigos como `BRA 10` e `ARG 07` via OCR no navegador;
+- não salva fotos nem vídeos;
+- não envia imagens para Firebase, Vercel ou qualquer nuvem;
+- só salva o código confirmado pelo usuário e a quantidade da figurinha;
+- mantém digitação manual como fallback caso a câmera/OCR falhe.
+
+Observação: a leitura por câmera depende de luz, foco, reflexo e da qualidade do texto impresso na figurinha. A confirmação manual é obrigatória antes de adicionar.

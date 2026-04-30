@@ -43,7 +43,7 @@ function initialState(){
 }
 
 let state = loadState();
-let currentView = 'dashboard';
+let currentView = 'album';
 let deferredInstallPrompt = null;
 let autoSync = localStorage.getItem(AUTO_SYNC_KEY) !== '0';
 let syncUi = { status: 'local', label: 'Modo local', detail: 'Entre com Google para sincronizar.' };
@@ -197,14 +197,17 @@ function toast(message, undo = false){
 }
 
 function setView(view){
+  if (currentView === 'scanner' && view !== 'scanner') stopScanner(false);
   currentView = view;
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   $$('.view').forEach(v => v.classList.toggle('active', v.id === view));
-  $('#viewTitle').textContent = ({dashboard:'Dashboard', album:'Álbum', mapa:'Mapa visual', listas:'Listas rápidas', trocas:'Repetidas e trocas', config:'Conta & Sincronização'})[view];
+  $('#viewTitle').textContent = ({album:'Álbum', scanner:'Escanear figurinha', listas:'Buscar e listas', trocas:'Repetidas e trocas', mapa:'Mapa visual', dashboard:'Resumo', config:'Conta & Sincronização'})[view];
   render();
 }
 function render(){
   if (currentView === 'dashboard') renderDashboard();
+  if (currentView === 'scanner') renderScanner();
+
   if (currentView === 'album') renderAlbum();
   if (currentView === 'mapa') renderMap();
   if (currentView === 'listas') renderLists();
@@ -263,21 +266,51 @@ function renderDashboard(){
 
 function renderAlbum(){
   const groups = [...new Set(window.ALBUM_DATA.teams.map(t => t.group))];
+  const s = stats();
   $('#album').innerHTML = `
-    <div class="filters">
+    <div class="album-hero">
+      <div>
+        <span class="label">Meu álbum</span>
+        <h3>${s.owned}/${s.total} figurinhas</h3>
+        <p>${pct(s.progress)} completo · ${s.missing} faltantes · ${s.duplicates} repetidas · ${s.physical} no acervo físico</p>
+      </div>
+      <div class="album-hero-actions">
+        <button class="primary" id="albumQuickAdd">Marcar figurinha</button>
+        <button class="ghost" id="albumScanBtn">Escanear</button>
+        <button class="ghost" id="albumShowMissing">Faltantes</button>
+        <button class="ghost" id="albumShowDup">Repetidas</button>
+      </div>
+    </div>
+    <div class="filters album-filters">
       <input id="searchInput" type="search" placeholder="Buscar por número, seleção, nome ou status..." />
       <select id="groupFilter"><option value="">Todos os grupos</option>${groups.map(g=>`<option value="${g}">Grupo ${g}</option>`).join('')}<option value="EXTRAS">Extras</option></select>
       <select id="statusFilter"><option value="">Todos status</option><option value="missing">Faltantes</option><option value="owned">Tenho</option><option value="duplicate">Repetidas</option><option value="reserved">Trocas/reservas</option></select>
       <button class="ghost" id="clearFilters">Limpar</button>
     </div>
-    <div class="helper-card">Clique em <strong>+</strong> para adicionar, <strong>-</strong> para remover. A quantidade não tem limite; a partir de 2, entra como repetida.</div>
-    <div id="teamList" class="team-list"></div>`;
+    <div class="status-chips" aria-label="Filtros rápidos">
+      <button data-chip="" class="chip active">Todas</button>
+      <button data-chip="missing" class="chip">Faltantes</button>
+      <button data-chip="owned" class="chip">Tenho</button>
+      <button data-chip="duplicate" class="chip">Repetidas</button>
+      <button data-chip="reserved" class="chip">Trocas</button>
+    </div>
+    <div class="helper-card album-helper">Toque em <strong>+</strong> para adicionar e em <strong>-</strong> para remover. Clique no centro da figurinha para alternar entre 0 e 1.</div>
+    <div id="teamList" class="team-list album-grid"></div>`;
   const sync = () => renderTeamList();
   $('#searchInput').addEventListener('input', sync);
   $('#groupFilter').addEventListener('change', sync);
-  $('#statusFilter').addEventListener('change', sync);
-  $('#clearFilters').addEventListener('click', () => { $('#searchInput').value=''; $('#groupFilter').value=''; $('#statusFilter').value=''; sync(); });
+  $('#statusFilter').addEventListener('change', () => { updateFilterChips(); sync(); });
+  $('#clearFilters').addEventListener('click', () => { $('#searchInput').value=''; $('#groupFilter').value=''; $('#statusFilter').value=''; updateFilterChips(); sync(); });
+  $('#albumQuickAdd').addEventListener('click', openQuickAdd);
+  $('#albumScanBtn')?.addEventListener('click', openScanner);
+  $('#albumShowMissing').addEventListener('click', () => { $('#statusFilter').value='missing'; updateFilterChips(); sync(); });
+  $('#albumShowDup').addEventListener('click', () => { $('#statusFilter').value='duplicate'; updateFilterChips(); sync(); });
+  $('.chip').forEach(btn => btn.addEventListener('click', () => { $('#statusFilter').value = btn.dataset.chip; updateFilterChips(); sync(); }));
   renderTeamList();
+}
+function updateFilterChips(){
+  const value = $('#statusFilter')?.value || '';
+  $('.chip').forEach(btn => btn.classList.toggle('active', btn.dataset.chip === value));
 }
 function renderTeamList(){
   const q = ($('#searchInput')?.value || '').trim().toLowerCase();
@@ -288,9 +321,10 @@ function renderTeamList(){
     const items = albumItems.filter(i => i.code === sec.code).filter(item => matchItem(item, q, status));
     if (!items.length) return '';
     const st = sectionStats(sec);
-    return `<article class="team-card ${st.progress === 1 ? 'complete' : ''}">
-      <div class="team-head"><div><span class="badge">${sec.group === 'EXTRAS' ? 'Extras' : `Grupo ${sec.group}`}</span><h3>${codeOf(sec)} · ${sec.name}</h3></div><strong>${st.owned}/${st.total}</strong></div>
+    return `<article class="team-card album-team ${st.progress === 1 ? 'complete' : ''} ${st.progress >= .75 ? 'almost' : st.progress <= .25 ? 'low' : 'mid'}">
+      <div class="team-head"><div><span class="badge">${sec.group === 'EXTRAS' ? 'Extras' : `Grupo ${sec.group}`}</span><h3>${codeOf(sec)} · ${sec.name}</h3><p>${st.owned}/${st.total} figurinhas · ${pct(st.progress)}</p></div><strong>${st.owned}/${st.total}</strong></div>
       <div class="progress-track muted-track"><span class="progress-fill" style="width:${pct(st.progress)}"></span></div>
+      <div class="team-mini-stats"><span>${st.missing} faltam</span><span>${st.duplicates} repetidas</span><span>${st.physical} físicas</span></div>
       ${st.progress === 1 ? '<div class="complete-ribbon">Completa</div>' : ''}
       <div class="sticker-grid">${items.map(stickerButton).join('')}</div>
     </article>`;
@@ -529,8 +563,164 @@ function renderQuickResults(){
 }
 function openQuickAdd(){ $('#markDialog').showModal(); $('#markSearch').value=''; renderQuickResults(); setTimeout(() => $('#markSearch').focus(), 30); }
 
+// v0.4 - Scanner de código de figurinha (processamento local, sem armazenamento de imagens)
+let scanner = { stream:null, timer:null, interval:null, active:false, endsAt:0, lastText:'', candidates:[] };
+function renderScanner(){
+  const active = scanner.active;
+  const remaining = active ? Math.max(0, Math.ceil((scanner.endsAt - Date.now()) / 1000)) : 10;
+  $('#scanner').innerHTML = `
+    <div class="scanner-layout">
+      <div class="card scanner-card">
+        <span class="label">Scanner mobile</span>
+        <h3>Escanear código da figurinha</h3>
+        <p>A câmera será usada por no máximo <strong>10 segundos</strong> para tentar ler códigos como <strong>BRA 10</strong>, <strong>ARG 07</strong> ou <strong>SED 05</strong>.</p>
+        <div class="privacy-note">🔒 Processamento local: nenhuma imagem ou vídeo é salvo, enviado para a nuvem, Firebase ou Vercel. Só o código confirmado vira dado da coleção.</div>
+        <div class="scanner-stage ${active ? 'active' : ''}">
+          <video id="scannerVideo" playsinline muted></video>
+          <div class="scanner-overlay"><span>Aponte para o código</span></div>
+        </div>
+        <canvas id="scannerCanvas" hidden></canvas>
+        <div class="scanner-status" id="scannerStatus">${active ? `Escaneando... ${remaining}s` : 'Pronto para iniciar.'}</div>
+        <div class="button-row">
+          <button class="primary" id="startScanner" ${active ? 'disabled' : ''}>Usar câmera por 10s</button>
+          <button class="ghost" id="stopScanner" ${active ? '' : 'disabled'}>Parar câmera</button>
+        </div>
+      </div>
+      <div class="card scanner-card">
+        <span class="label">Plano B rápido</span>
+        <h3>Digitar código manualmente</h3>
+        <p>Se a câmera não ler bem por reflexo ou movimento, digite o código e adicione +1.</p>
+        <div class="scanner-manual">
+          <input id="manualScanCode" placeholder="Ex: BRA 10" value="${escapeAttr(scanner.lastText || '')}" />
+          <button class="primary" id="manualScanBtn">Buscar</button>
+        </div>
+        <div id="scannerResult" class="scanner-results"></div>
+      </div>
+    </div>`;
+  $('#startScanner')?.addEventListener('click', startScanner);
+  $('#stopScanner')?.addEventListener('click', () => stopScanner(true));
+  $('#manualScanBtn')?.addEventListener('click', () => showScannerCandidates($('#manualScanCode').value));
+  $('#manualScanCode')?.addEventListener('keydown', e => { if(e.key === 'Enter') showScannerCandidates(e.currentTarget.value); });
+  renderScannerCandidates();
+  if (active) attachStreamToVideo();
+}
+function openScanner(){ setView('scanner'); }
+async function startScanner(){
+  if (!navigator.mediaDevices?.getUserMedia) return toast('Câmera não disponível neste navegador.');
+  if (!window.Tesseract) return toast('Leitor OCR não carregou. Use a digitação manual.');
+  try {
+    scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio:false });
+    scanner.active = true;
+    scanner.endsAt = Date.now() + 10000;
+    scanner.candidates = [];
+    renderScanner();
+    attachStreamToVideo();
+    scanner.timer = setTimeout(() => finishScannerTimeout(), 10000);
+    scanner.interval = setInterval(scanFrameOnce, 2200);
+    setTimeout(scanFrameOnce, 1200);
+  } catch(e){
+    console.warn(e);
+    toast('Não consegui acessar a câmera.');
+    setScannerStatus('Permissão negada ou câmera indisponível. Use a digitação manual.');
+  }
+}
+function attachStreamToVideo(){
+  const video = $('#scannerVideo');
+  if (video && scanner.stream) { video.srcObject = scanner.stream; video.play().catch(()=>{}); }
+}
+function stopScanner(showToast = false){
+  scanner.active = false;
+  clearTimeout(scanner.timer); clearInterval(scanner.interval);
+  scanner.timer = null; scanner.interval = null;
+  if (scanner.stream) scanner.stream.getTracks().forEach(t => t.stop());
+  scanner.stream = null;
+  if (showToast) toast('Câmera desligada.');
+  if (currentView === 'scanner') renderScanner();
+}
+function finishScannerTimeout(){
+  stopScanner(false);
+  setTimeout(() => {
+    if (currentView === 'scanner') {
+      renderScanner();
+      setScannerStatus('Tempo de 10s encerrado. Nenhuma imagem foi salva. Tente novamente ou digite o código.');
+    }
+  }, 30);
+}
+function setScannerStatus(msg){ const el = $('#scannerStatus'); if (el) el.textContent = msg; }
+async function scanFrameOnce(){
+  if (!scanner.active || scanner.recognizing) return;
+  const video = $('#scannerVideo'); const canvas = $('#scannerCanvas');
+  if (!video || !canvas || !video.videoWidth) return;
+  scanner.recognizing = true;
+  try {
+    const w = Math.min(960, video.videoWidth); const h = Math.round(video.videoHeight * (w / video.videoWidth));
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently:true });
+    ctx.drawImage(video, 0, 0, w, h);
+    setScannerStatus('Lendo código localmente...');
+    const result = await Tesseract.recognize(canvas, 'eng');
+    const text = result?.data?.text || '';
+    scanner.lastText = text.trim().slice(0, 120);
+    const candidates = findStickerCandidates(text);
+    if (candidates.length) {
+      scanner.candidates = candidates;
+      stopScanner(false);
+      renderScanner();
+      setScannerStatus('Código encontrado. Confirme antes de adicionar.');
+      toast('Código detectado. Confirme a figurinha.');
+    } else if (scanner.active) {
+      const remaining = Math.max(0, Math.ceil((scanner.endsAt - Date.now()) / 1000));
+      setScannerStatus(`Ainda não encontrei. Tentando novamente... ${remaining}s`);
+    }
+  } catch(e){
+    console.warn(e);
+    setScannerStatus('OCR falhou nesta tentativa. Tente aproximar ou digite manualmente.');
+  } finally { scanner.recognizing = false; }
+}
+function showScannerCandidates(raw){
+  scanner.lastText = raw || '';
+  scanner.candidates = findStickerCandidates(raw || '');
+  renderScannerCandidates();
+  setScannerStatus(scanner.candidates.length ? 'Código encontrado. Confirme antes de adicionar.' : 'Não encontrei esse código na base. Confira o formato, ex: BRA 10.');
+}
+function findStickerCandidates(raw){
+  const text = String(raw || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  const compact = text.replace(/[^A-Z0-9]+/g,' ');
+  const matches = [];
+  const patterns = [/[\b\s]([A-Z]{3})\s*(\d{1,2})[\b\s]/g, /^([A-Z]{3})\s*(\d{1,2})$/g];
+  for (const re of patterns) {
+    let m;
+    const source = ` ${compact} `;
+    while ((m = re.exec(source)) !== null) {
+      const code = m[1]; const num = Number(m[2]);
+      if (!num || num > 99) continue;
+      const found = albumItems.filter(i => (i.ref.split(' ')[0] === code || i.code === code) && i.number === num);
+      found.forEach(item => { if (!matches.some(x => x.id === item.id)) matches.push(item); });
+    }
+  }
+  return matches.slice(0, 8);
+}
+function renderScannerCandidates(){
+  const box = $('#scannerResult');
+  if (!box) return;
+  if (!scanner.candidates.length) {
+    box.innerHTML = `<div class="empty scanner-empty">Nenhuma figurinha detectada ainda.</div>`;
+    return;
+  }
+  box.innerHTML = scanner.candidates.map(i => `
+    <div class="result-item ${statusClass(i)}">
+      <div><strong>${i.ref}</strong><br><span class="muted">${i.section} · qtd atual ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span></div>
+      <div class="button-row scanner-choice-actions"><button class="primary" data-scan-add="${i.id}">Adicionar +1</button><button class="ghost" data-scan-open="${i.id}">Zerar/alternar</button></div>
+    </div>`).join('') + (scanner.candidates.length > 1 ? `<p class="muted">Mais de uma opção encontrada. Escolha a correta antes de adicionar.</p>` : '');
+  $$('[data-scan-add]', box).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.scanAdd, 1); scanner.candidates = []; renderScannerCandidates(); }));
+  $$('[data-scan-open]', box).forEach(b => b.addEventListener('click', () => { quickToggle(b.dataset.scanOpen); renderScannerCandidates(); }));
+}
+
+
 $$('.nav-item').forEach(btn => btn.addEventListener('click', () => setView(btn.dataset.view)));
 $('#quickAddBtn').addEventListener('click', openQuickAdd);
+$('#scanTopBtn')?.addEventListener('click', openScanner);
+$("#fabQuickAdd")?.addEventListener("click", openQuickAdd);
 $('#markSearch').addEventListener('input', renderQuickResults);
 $('#syncNowBtn').addEventListener('click', syncNow);
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; $('#installBtn').hidden = false; });
@@ -538,4 +728,4 @@ $('#installBtn').addEventListener('click', async () => { if(deferredInstallPromp
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 initCloud();
 updateChrome();
-renderDashboard();
+renderAlbum();

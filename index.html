@@ -19,12 +19,13 @@
         </div>
       </div>
       <nav class="nav" aria-label="Navegação principal">
-        <button class="nav-item active" data-view="dashboard">Dashboard</button>
-        <button class="nav-item" data-view="album">Álbum</button>
-        <button class="nav-item" data-view="mapa">Mapa visual</button>
-        <button class="nav-item" data-view="listas">Listas</button>
+        <button class="nav-item active" data-view="album">Álbum</button>
+        <button class="nav-item" data-view="scanner">Escanear</button>
+        <button class="nav-item" data-view="listas">Buscar</button>
         <button class="nav-item" data-view="trocas">Trocas</button>
-        <button class="nav-item" data-view="config">Conta & Sync</button>
+        <button class="nav-item" data-view="mapa">Mapa</button>
+        <button class="nav-item" data-view="dashboard">Resumo</button>
+        <button class="nav-item" data-view="config">Conta</button>
       </nav>
       <div class="side-card">
         <span class="label">Progresso</span>
@@ -38,18 +39,20 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">Álbum de seleções 2026</p>
-          <h2 id="viewTitle">Dashboard</h2>
+          <h2 id="viewTitle">Álbum</h2>
         </div>
         <div class="top-actions">
           <span id="syncBadge" class="sync-badge offline">Modo local</span>
           <button class="ghost" id="installBtn" hidden>Instalar app</button>
           <button class="ghost" id="syncNowBtn" title="Sincronizar agora">Sincronizar agora</button>
+          <button class="ghost" id="scanTopBtn" title="Escanear figurinha">Escanear</button>
           <button class="primary" id="quickAddBtn">Marcar figurinha</button>
         </div>
       </header>
 
-      <section id="dashboard" class="view active"></section>
-      <section id="album" class="view"></section>
+      <section id="dashboard" class="view"></section>
+      <section id="album" class="view active"></section>
+      <section id="scanner" class="view"></section>
       <section id="mapa" class="view"></section>
       <section id="listas" class="view"></section>
       <section id="trocas" class="view"></section>
@@ -73,12 +76,14 @@
     </form>
   </dialog>
 
+  <button id="fabQuickAdd" class="fab" aria-label="Marcar figurinha">+</button>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="data.js"></script>
   <script src="firebase-config.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js/dist/tesseract.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
