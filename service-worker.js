@@ -1,6 +1,5 @@
-const CACHE='figurinhas-mundial-v083-banners-nacionais';
-const FILES=['./','./index.html','./styles.css','./app.js',
-'./data.js','./firebase-config.js','./manifest.webmanifest','./icon.svg','./flags/alg.svg','./flags/arg.svg','./flags/aus.svg','./flags/aut.svg','./flags/bel.svg','./flags/bih.svg','./flags/bra.svg','./flags/can.svg','./flags/civ.svg','./flags/cod.svg','./flags/col.svg','./flags/cpv.svg','./flags/cro.svg','./flags/cuw.svg','./flags/cze.svg','./flags/ecu.svg','./flags/egy.svg','./flags/eng.svg','./flags/esp.svg','./flags/fra.svg','./flags/ger.svg','./flags/gha.svg','./flags/hai.svg','./flags/irn.svg','./flags/irq.svg','./flags/jor.svg','./flags/jpn.svg','./flags/kor.svg','./flags/ksa.svg','./flags/mar.svg','./flags/mex.svg','./flags/ned.svg','./flags/nor.svg','./flags/nzl.svg','./flags/pan.svg','./flags/par.svg','./flags/por.svg','./flags/qat.svg','./flags/rsa.svg','./flags/sco.svg','./flags/sen.svg','./flags/sui.svg','./flags/swe.svg','./flags/tun.svg','./flags/tur.svg','./flags/uru.svg','./flags/usa.svg','./flags/uzb.svg'];
+const CACHE='figurinhas-mundial-v084-flags-inline';
+const FILES=['./','./index.html','./styles.css','./app.js','./data.js','./firebase-config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
 self.addEventListener('fetch',event=>{
