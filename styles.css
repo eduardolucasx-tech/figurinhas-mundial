@@ -550,3 +550,60 @@ button,.ghost,.primary,.hero-btn,.nav-item,.team-card,.sticker,.pill-btn,.filter
 .add-helper{
   display:none !important;
 }
+
+
+/* v0.9.1 — Modo Família */
+.account-pill.family{
+  background:linear-gradient(135deg,#fff3c4,#e4fff1);
+  color:#0a5f42;
+}
+.family-card{
+  background:
+    radial-gradient(circle at 92% 8%, rgba(244,195,91,.16), transparent 26%),
+    rgba(255,250,240,.90);
+}
+.family-card h3{
+  margin:18px 0 10px;
+  font-size:clamp(24px,2.2vw,34px);
+  letter-spacing:-.045em;
+  color:#08162d;
+}
+.family-code-box{
+  display:grid;
+  gap:5px;
+  padding:16px;
+  border-radius:18px;
+  background:#0a224d;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 14px 28px rgba(5,23,52,.12);
+  margin:16px 0;
+}
+.family-code-box small{
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  color:#cde6ff;
+  font-weight:900;
+}
+.family-code-box strong{
+  font-size:clamp(28px,3vw,42px);
+  letter-spacing:.04em;
+}
+.join-family-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  margin-top:14px;
+}
+.join-family-row input{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px 14px;
+  background:#fffdf7;
+  color:var(--ink);
+}
+@media (max-width:560px){
+  .join-family-row{
+    grid-template-columns:1fr;
+  }
+}

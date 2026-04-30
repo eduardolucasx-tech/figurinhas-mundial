@@ -30,3 +30,7 @@ A configuração fica em `firebase-config.js`. A segurança fica nas regras do F
 - Move a instalação do app para a aba Conta.
 - Mantém os filtros do Álbum como principal forma de navegação.
 - Adiciona acesso ao Mapa como opção de visualização dentro do Álbum.
+
+
+## Modo Família
+Esta versão adiciona coleção compartilhada por código de família. Depois de publicar, atualize as regras do Firestore com o conteúdo de `FIREBASE_RULES.txt`.
