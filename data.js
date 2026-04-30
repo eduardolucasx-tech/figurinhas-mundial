@@ -1,8 +1,8 @@
 window.ALBUM_DATA = {
   appName: 'Checklist Mundial',
-  version: '0.7.5-ordem-album-994',
+  version: '0.7.6-ordem-album-994-extras-final',
   total: 994,
-  // Ordem oficial de aparição informada pelo Lucas: 00, FWC 1–8, seleções, FWC 9–19 e Coca-Cola 1–14.
+  // Ordem de layout ajustada: seleções na ordem do álbum e, ao final, 00 + FWC 01–19 antes da Coca-Cola.
   teams: [
     {group:'A', code:'MEX', name:'México'}, {group:'A', code:'RSA', name:'África do Sul'}, {group:'A', code:'KOR', name:'Coreia do Sul'}, {group:'A', code:'CZE', name:'República Tcheca'},
     {group:'B', code:'CAN', name:'Canadá'}, {group:'B', code:'BIH', name:'Bósnia'}, {group:'B', code:'QAT', name:'Qatar'}, {group:'B', code:'SUI', name:'Suíça'},
@@ -19,13 +19,10 @@ window.ALBUM_DATA = {
   ],
   specialSections: [
     {group:'EXTRAS', code:'ZERO', displayCode:'00', name:'Figurinha 00 · Abertura', count: 1, start: 0, sectionKey:'ZERO-00'},
-    {group:'EXTRAS', code:'FWC', name:'Figurinhas especiais FWC 01–08', count: 8, start: 1, sectionKey:'FWC-01-08'},
-    {group:'EXTRAS', code:'FWC', name:'Figurinhas especiais FWC 09–19', count: 11, start: 9, sectionKey:'FWC-09-19'},
+    {group:'EXTRAS', code:'FWC', name:'Figurinhas especiais FWC 01–19', count: 19, start: 1, sectionKey:'FWC-01-19'},
     {group:'EXTRAS', code:'COC', displayCode:'COC', name:'Coca-Cola', count: 14, start: 1, sectionKey:'COC-01-14'}
   ],
   sections: [
-    {group:'EXTRAS', code:'ZERO', displayCode:'00', name:'Figurinha 00 · Abertura', count:1, start:0, kind:'special', sectionKey:'ZERO-00'},
-    {group:'EXTRAS', code:'FWC', name:'Figurinhas especiais FWC 01–08', count:8, start:1, kind:'special', sectionKey:'FWC-01-08'},
     {group:'A', code:'MEX', name:'México', kind:'team'}, {group:'A', code:'RSA', name:'África do Sul', kind:'team'}, {group:'A', code:'KOR', name:'Coreia do Sul', kind:'team'}, {group:'A', code:'CZE', name:'República Tcheca', kind:'team'},
     {group:'B', code:'CAN', name:'Canadá', kind:'team'}, {group:'B', code:'BIH', name:'Bósnia', kind:'team'}, {group:'B', code:'QAT', name:'Qatar', kind:'team'}, {group:'B', code:'SUI', name:'Suíça', kind:'team'},
     {group:'C', code:'BRA', name:'Brasil', kind:'team'}, {group:'C', code:'MAR', name:'Marrocos', kind:'team'}, {group:'C', code:'HAI', name:'Haiti', kind:'team'}, {group:'C', code:'SCO', name:'Escócia', kind:'team'},
@@ -38,7 +35,8 @@ window.ALBUM_DATA = {
     {group:'J', code:'ARG', name:'Argentina', kind:'team'}, {group:'J', code:'ALG', name:'Argélia', kind:'team'}, {group:'J', code:'AUT', name:'Áustria', kind:'team'}, {group:'J', code:'JOR', name:'Jordânia', kind:'team'},
     {group:'K', code:'POR', name:'Portugal', kind:'team'}, {group:'K', code:'COD', name:'Congo', kind:'team'}, {group:'K', code:'UZB', name:'Uzbequistão', kind:'team'}, {group:'K', code:'COL', name:'Colômbia', kind:'team'},
     {group:'L', code:'ENG', name:'Inglaterra', kind:'team'}, {group:'L', code:'CRO', name:'Croácia', kind:'team'}, {group:'L', code:'GHA', name:'Gana', kind:'team'}, {group:'L', code:'PAN', name:'Panamá', kind:'team'},
-    {group:'EXTRAS', code:'FWC', name:'Figurinhas especiais FWC 09–19', count:11, start:9, kind:'special', sectionKey:'FWC-09-19'},
+    {group:'EXTRAS', code:'ZERO', displayCode:'00', name:'Figurinha 00 · Abertura', count:1, start:0, kind:'special', sectionKey:'ZERO-00'},
+    {group:'EXTRAS', code:'FWC', name:'Figurinhas especiais FWC 01–19', count:19, start:1, kind:'special', sectionKey:'FWC-01-19'},
     {group:'EXTRAS', code:'COC', displayCode:'COC', name:'Coca-Cola', count:14, start:1, kind:'special', sectionKey:'COC-01-14'}
   ]
 };
