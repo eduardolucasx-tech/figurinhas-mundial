@@ -32,3 +32,4 @@ Veja `PASSO_A_PASSO_PUBLICAR.md`.
 ## Segurança
 
 Use as regras do arquivo `FIREBASE_RULES.txt` no Firestore. Elas fazem cada usuário ler e gravar apenas o próprio documento.
+DEPLOY INICIAL
