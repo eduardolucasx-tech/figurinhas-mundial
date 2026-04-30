@@ -1,5 +1,3 @@
-// Configuração Firebase do app Checklist Mundial
-
 window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyB85glvFZnQEvEahEvuXkipJDk5i0JE4o",
   authDomain: "figurinhas-mundial.firebaseapp.com",
