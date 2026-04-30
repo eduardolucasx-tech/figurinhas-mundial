@@ -1,5 +1,5 @@
 window.FIREBASE_CONFIG = {
-  apiKey: "AIzaSyB85glvFZCnQEvEahEvuXkipJDk5i0JE4o",
+  apiKey: "AIzaSyB85glvfZCnQEvEahEvuXkipJDk5i0JE4o",
   authDomain: "figurinhas-mundial.firebaseapp.com",
   projectId: "figurinhas-mundial",
   storageBucket: "figurinhas-mundial.firebasestorage.app",
