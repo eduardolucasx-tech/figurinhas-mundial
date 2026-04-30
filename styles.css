@@ -552,58 +552,69 @@ button,.ghost,.primary,.hero-btn,.nav-item,.team-card,.sticker,.pill-btn,.filter
 }
 
 
-/* v0.9.1 — Modo Família */
-.account-pill.family{
-  background:linear-gradient(135deg,#fff3c4,#e4fff1);
-  color:#0a5f42;
+/* v0.9.1 — Modo Família real */
+.family-account-simple{
+  grid-template-columns:1.05fr .95fr;
 }
-.family-card{
+.family-mode-card{
   background:
-    radial-gradient(circle at 92% 8%, rgba(244,195,91,.16), transparent 26%),
+    radial-gradient(circle at 100% 0%, rgba(103,200,255,.12), transparent 28%),
+    radial-gradient(circle at 0% 100%, rgba(244,195,91,.12), transparent 30%),
     rgba(255,250,240,.90);
 }
-.family-card h3{
-  margin:18px 0 10px;
-  font-size:clamp(24px,2.2vw,34px);
-  letter-spacing:-.045em;
-  color:#08162d;
+.account-pill.family{
+  background:#e8f1ff;
+  color:#0b3b8f;
 }
 .family-code-box{
-  display:grid;
-  gap:5px;
-  padding:16px;
+  margin:18px 0 14px;
+  padding:18px;
   border-radius:18px;
-  background:#0a224d;
+  background:linear-gradient(135deg,#061a46,#0b2d64);
   color:#fff;
-  border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 14px 28px rgba(5,23,52,.12);
-  margin:16px 0;
+  box-shadow:0 18px 32px rgba(6,26,70,.20);
 }
-.family-code-box small{
+.family-code-box span{
+  display:block;
+  font-size:12px;
   text-transform:uppercase;
-  letter-spacing:.10em;
-  color:#cde6ff;
+  letter-spacing:.12em;
   font-weight:900;
+  color:#b9d6ff;
+  margin-bottom:8px;
 }
 .family-code-box strong{
-  font-size:clamp(28px,3vw,42px);
+  display:block;
+  font-size:clamp(34px,4vw,48px);
+  line-height:1;
   letter-spacing:.04em;
 }
-.join-family-row{
+.family-join-row{
   display:grid;
   grid-template-columns:1fr auto;
   gap:10px;
-  margin-top:14px;
+  margin-top:12px;
 }
-.join-family-row input{
+.family-join-row input{
+  width:100%;
   border:1px solid var(--line);
   border-radius:16px;
   padding:12px 14px;
   background:#fffdf7;
   color:var(--ink);
+  font-weight:900;
+  text-transform:uppercase;
+}
+@media (max-width:900px){
+  .family-account-simple{
+    grid-template-columns:1fr;
+  }
 }
 @media (max-width:560px){
-  .join-family-row{
+  .family-join-row{
     grid-template-columns:1fr;
+  }
+  .family-code-box strong{
+    font-size:34px;
   }
 }

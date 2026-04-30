@@ -1,10 +1,10 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.9.1-modo-familia';
+const THEME_VERSION = '0.9.1-modo-familia-real';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
-const FAMILY_ID_KEY = 'checklist-mundial-family-id';
 const AUTO_SYNC_KEY = 'checklist-mundial-auto-sync';
+const FAMILY_CODE_KEY = 'checklist-mundial-family-code';
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
@@ -55,7 +55,9 @@ let deferredInstallPrompt = null;
 let autoSync = localStorage.getItem(AUTO_SYNC_KEY) !== '0';
 let syncUi = { status: 'local', label: 'Modo local', detail: 'Entre com Google para sincronizar.' };
 let cloudSaveTimer = null;
-let cloud = { ready:false, auth:null, db:null, user:null, provider:null, lastSyncAt:null, loading:false, familyId: localStorage.getItem(FAMILY_ID_KEY) || '' };
+let cloud = { ready:false, auth:null, db:null, user:null, provider:null, lastSyncAt:null, loading:false };
+let familyCode = normalizeFamilyCode(localStorage.getItem(FAMILY_CODE_KEY) || '');
+let cloudUnsubscribe = null;
 let undoSnapshot = null;
 let packSession = [];
 
@@ -328,7 +330,10 @@ function updateChrome(){
   const badge = $('#syncBadge');
   if (badge) { badge.className = `sync-badge ${syncUi.status}`; badge.textContent = syncUi.label; }
   const side = $('#sideSync');
-  if (side) side.textContent = cloud.user ? (syncUi.label + (cloud.user.email ? ` · ${cloud.user.email}` : '')) : syncUi.label;
+  if (side) {
+    const mode = familyCode ? `Família ${familyCode}` : (cloud.user?.email || '');
+    side.textContent = cloud.user ? `${syncUi.label}${mode ? ` · ${mode}` : ''}` : syncUi.label;
+  }
 }
 function toast(message, undo = false){
   const el = $('#toast');
@@ -554,16 +559,16 @@ function renderTrades(){
 function renderConfig(){
   const logged = !!cloud.user;
   const email = cloud.user?.email || '';
-  const familyId = cloud.familyId || '';
+  const familyActive = !!familyCode;
   $('#config').innerHTML = `
-    <div class="account-simple">
+    <div class="account-simple family-account-simple">
       <section class="card account-hero-card">
         <span class="label">Conta e nuvem</span>
-        <h3>${logged ? (familyId ? 'Modo família ativo' : 'Tudo sincronizado') : 'Entre para sincronizar'}</h3>
-        <p>${logged ? `Google conectado em <strong>${email}</strong>. ${familyId ? `Você está usando a coleção compartilhada <strong>${familyId}</strong>.` : 'Você está usando sua coleção pessoal.'}` : 'Entre com Google para salvar sua coleção na nuvem e usar em qualquer aparelho.'}</p>
+        <h3>${logged ? (familyActive ? 'Família sincronizada' : 'Tudo sincronizado') : 'Entre para sincronizar'}</h3>
+        <p>${logged ? `Google conectado em <strong>${email}</strong>. ${familyActive ? `Você está usando a coleção compartilhada <strong>${familyCode}</strong>.` : 'Suas figurinhas ficam salvas na sua coleção pessoal.'}` : 'Entre com Google para salvar sua coleção na nuvem e usar em qualquer aparelho.'}</p>
         <div class="account-status-row">
           <span class="account-pill ${logged ? 'ok' : 'local'}">${logged ? 'Google conectado' : 'Modo local'}</span>
-          <span class="account-pill ${familyId ? 'family' : ''}">${familyId ? 'Coleção da família' : 'Coleção pessoal'}</span>
+          <span class="account-pill ${familyActive ? 'family' : ''}">${familyActive ? `Família ${familyCode}` : 'Coleção pessoal'}</span>
           <span class="account-pill">${autoSync ? 'Sync automático ativo' : 'Sync automático pausado'}</span>
         </div>
         <div class="button-row account-actions">
@@ -572,26 +577,26 @@ function renderConfig(){
         </div>
       </section>
 
-      <section class="card family-card">
-        <span class="label">Modo família</span>
-        <h3>Compartilhar coleção</h3>
-        <p>Use uma única coleção com seu enteado ou amigos. Quem entrar com o código vê e atualiza o mesmo álbum.</p>
-        ${familyId ? `
+      <section class="card family-mode-card">
+        <span class="label">Modo Família</span>
+        <h3>${familyActive ? 'Compartilhar coleção' : 'Usar coleção compartilhada'}</h3>
+        <p>${familyActive ? 'Use este código no outro celular ou computador. Quem entrar com o código vê e atualiza o mesmo álbum.' : 'Crie um código de família ou entre com o código que alguém compartilhou com você.'}</p>
+        ${familyActive ? `
           <div class="family-code-box">
-            <small>Código da família</small>
-            <strong>${familyId}</strong>
+            <span>Código da família</span>
+            <strong>${familyCode}</strong>
           </div>
           <div class="button-row">
             <button class="primary" id="copyFamilyCode">Copiar código</button>
-            <button class="ghost" id="leaveFamily">Voltar para coleção pessoal</button>
+            <button class="ghost" id="leaveFamilyMode">Voltar para coleção pessoal</button>
           </div>
         ` : `
           <div class="button-row">
-            <button class="primary" id="createFamily">Criar família</button>
+            <button class="primary" id="createFamilyMode">Criar família</button>
           </div>
-          <div class="join-family-row">
-            <input id="familyCodeInput" placeholder="Código da família: FAM-ABC123">
-            <button class="ghost" id="joinFamily">Entrar</button>
+          <div class="family-join-row">
+            <input id="familyCodeInput" placeholder="Digite o código da família">
+            <button class="ghost" id="joinFamilyMode">Entrar</button>
           </div>
         `}
       </section>
@@ -621,7 +626,7 @@ function renderConfig(){
       <section class="card danger-simple-card">
         <span class="label">Manutenção</span>
         <h3>Zerar coleção</h3>
-        <p>${familyId ? 'Atenção: no modo família, isso zera a coleção compartilhada.' : 'Use só se quiser apagar tudo deste aparelho e começar do zero.'}</p>
+        <p>Use só se quiser apagar tudo da coleção atual e começar do zero.</p>
         <div class="button-row">
           <button class="danger" id="resetAll">Zerar tudo</button>
         </div>
@@ -640,20 +645,22 @@ function renderConfig(){
   $('#googleLogin').addEventListener('click', signInCloud);
   $('#googleLogout').addEventListener('click', signOutCloud);
   $('#manualSync').addEventListener('click', syncNow);
-  $('#createFamily')?.addEventListener('click', createFamilyCloud);
-  $('#joinFamily')?.addEventListener('click', () => joinFamilyCloud($('#familyCodeInput')?.value || ''));
-  $('#leaveFamily')?.addEventListener('click', leaveFamilyCloud);
-  $('#copyFamilyCode')?.addEventListener('click', () => copyText(familyId));
   $('#autoSyncToggle').addEventListener('change', e => {
     autoSync = e.target.checked;
     localStorage.setItem(AUTO_SYNC_KEY, autoSync ? '1' : '0');
     toast(autoSync ? 'Sincronização automática ativada.' : 'Sincronização automática pausada.');
     renderConfig();
   });
-  $('#resetAll').addEventListener('click', () => {
-    if(confirm(familyId ? 'Zerar a coleção compartilhada da família?' : 'Zerar todas as marcações?')){
+  $('#createFamilyMode')?.addEventListener('click', createFamilyMode);
+  $('#joinFamilyMode')?.addEventListener('click', () => joinFamilyMode($('#familyCodeInput')?.value || ''));
+  $('#familyCodeInput')?.addEventListener('keydown', e => { if(e.key === 'Enter') joinFamilyMode(e.target.value); });
+  $('#copyFamilyCode')?.addEventListener('click', () => copyText(familyCode));
+  $('#leaveFamilyMode')?.addEventListener('click', leaveFamilyMode);
+  $('#resetAll').addEventListener('click', async () => {
+    if(confirm('Zerar todas as marcações da coleção atual?')){
       state = initialState();
       saveState();
+      if (cloud.user) await saveCloud(false);
       render();
     }
   });
@@ -693,10 +700,12 @@ function initCloud(){
     cloud.ready = true;
     setSync('ready','Nuvem pronta','Entre com Google para sincronizar.');
     cloud.auth.onAuthStateChanged(async user => {
+      stopCloudListener();
       cloud.user = user;
       if (user) {
-        setSync('syncing','Carregando nuvem','Buscando seus dados salvos.');
+        setSync('syncing','Carregando nuvem','Buscando dados salvos.');
         await syncNow(false);
+        startCloudListener();
       } else {
         setSync('ready','Modo local','Entre com Google para sincronizar.');
       }
@@ -704,45 +713,55 @@ function initCloud(){
     });
   } catch(e){ console.warn('Cloud init failed', e); setSync('error','Erro na nuvem', e.message || 'Falha ao iniciar Firebase.'); }
 }
-function activeCloudLabel(){
-  return cloud.familyId ? `Família ${cloud.familyId}` : 'Coleção pessoal';
+function normalizeFamilyCode(value){
+  return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'').replace(/^FAM?-/,'FAM-').slice(0, 12);
 }
 function generateFamilyCode(){
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = 'FAM-';
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  for(let i=0;i<6;i++) code += alphabet[Math.floor(Math.random()*alphabet.length)];
   return code;
 }
-function sanitizeFamilyCode(value){
-  let v = String(value || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'');
-  if (!v) return '';
-  if (!v.startsWith('FAM-')) v = v.replace(/^FAM/, '').replace(/^-/, '');
-  if (!v.startsWith('FAM-')) v = `FAM-${v}`;
-  return v.slice(0, 10);
+function currentCloudMode(){
+  return familyCode ? 'family' : 'personal';
 }
-function familyPayload(){
-  return {
-    state,
-    members: { [cloud.user.uid]: true },
-    memberEmails: { [cloud.user.uid]: cloud.user.email || '' },
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    localUpdatedAt: state.updatedAt,
-    updatedBy: cloud.user.uid,
-    updatedByEmail: cloud.user.email || '',
-    appVersion: window.ALBUM_DATA.version
-  };
-}
-
 function cloudDoc(){
   if (!cloud.ready || !cloud.user) return null;
-  if (cloud.familyId) return cloud.db.collection(FAMILY_COLLECTION).doc(cloud.familyId);
+  if (familyCode) return cloud.db.collection(FAMILY_COLLECTION).doc(familyCode);
   return cloud.db.collection(CLOUD_COLLECTION).doc(cloud.user.uid);
+}
+function stopCloudListener(){
+  if (typeof cloudUnsubscribe === 'function') {
+    try { cloudUnsubscribe(); } catch(e){}
+  }
+  cloudUnsubscribe = null;
+}
+function startCloudListener(){
+  stopCloudListener();
+  const doc = cloudDoc();
+  if (!doc) return;
+  cloudUnsubscribe = doc.onSnapshot(snap => {
+    if (!snap.exists || !snap.data().state) return;
+    const remote = normalizeState(snap.data().state);
+    const localTime = Date.parse(state.updatedAt || 0);
+    const remoteTime = Date.parse(remote.updatedAt || 0);
+    if (remoteTime > localTime) {
+      state = remote;
+      saveState({skipCloud:true});
+      render();
+    }
+    cloud.lastSyncAt = new Date();
+    setSync('ok', 'Sincronizado', familyCode ? `Família ${familyCode}` : 'Coleção pessoal atualizada.');
+  }, e => {
+    console.warn(e);
+    setSync('error','Erro na nuvem', e.message || 'Falha ao acompanhar coleção.');
+  });
 }
 function queueCloudSave(){
   clearTimeout(cloudSaveTimer);
   if (!navigator.onLine) return setSync('offline','Offline','Alterações salvas localmente. Sincronize quando a internet voltar.');
-  setSync('pending','Alterações pendentes','Salvando automaticamente em instantes.');
-  cloudSaveTimer = setTimeout(() => saveCloud(false), 1200);
+  setSync('pending','Alterações pendentes', familyCode ? `Salvando na família ${familyCode}.` : 'Salvando automaticamente em instantes.');
+  cloudSaveTimer = setTimeout(() => saveCloud(false), 900);
 }
 async function signInCloud(){
   if (!cloud.ready) return toast('Nuvem ainda não configurada.');
@@ -751,107 +770,99 @@ async function signInCloud(){
 }
 async function signOutCloud(){
   if (!cloud.ready) return toast('Nuvem não configurada.');
-  try { await cloud.auth.signOut(); toast('Você saiu da conta.'); }
+  try { stopCloudListener(); await cloud.auth.signOut(); toast('Você saiu da conta.'); }
   catch(e){ toast('Não consegui sair.'); }
 }
-async function createFamilyCloud(){
-  if (!cloud.user) return toast('Entre com Google antes de criar uma família.');
-  let code = generateFamilyCode();
-  let doc = cloud.db.collection(FAMILY_COLLECTION).doc(code);
-  for (let tries = 0; tries < 5; tries++){
-    const snap = await doc.get();
-    if (!snap.exists) break;
-    code = generateFamilyCode();
-    doc = cloud.db.collection(FAMILY_COLLECTION).doc(code);
-  }
-  try{
-    await doc.set(familyPayload(), {merge:true});
-    cloud.familyId = code;
-    localStorage.setItem(FAMILY_ID_KEY, code);
-    setSync('ok','Modo família',`Coleção compartilhada ${code}.`);
-    toast(`Família criada: ${code}`);
-    render();
-  }catch(e){
-    console.warn(e);
-    toast('Não consegui criar a família.');
-  }
-}
-async function joinFamilyCloud(codeInput = ''){
-  if (!cloud.user) return toast('Entre com Google antes de entrar numa família.');
-  const code = sanitizeFamilyCode(codeInput || prompt('Digite o código da família'));
-  if (!code || code.length < 8) return toast('Código de família inválido.');
-  const doc = cloud.db.collection(FAMILY_COLLECTION).doc(code);
-  try{
-    const snap = await doc.get();
-    if (!snap.exists) return toast('Não encontrei essa família.');
-    await doc.set({
-      members: { [cloud.user.uid]: true },
-      memberEmails: { [cloud.user.uid]: cloud.user.email || '' },
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, {merge:true});
-    cloud.familyId = code;
-    localStorage.setItem(FAMILY_ID_KEY, code);
-    await loadCloud(false);
-    setSync('ok','Modo família',`Coleção compartilhada ${code}.`);
-    toast(`Você entrou na família ${code}.`);
-    render();
-  }catch(e){
-    console.warn(e);
-    toast('Não consegui entrar na família.');
-  }
-}
-async function leaveFamilyCloud(){
-  if (!cloud.familyId) return toast('Você já está na coleção pessoal.');
-  const old = cloud.familyId;
-  cloud.familyId = '';
-  localStorage.removeItem(FAMILY_ID_KEY);
-  await syncNow(false);
-  toast(`Você saiu da família ${old}. Agora está na coleção pessoal.`);
-  render();
-}
-
 async function saveCloud(showToast = true){
   const doc = cloudDoc();
   if (!doc) { setSync('ready','Modo local','Entre com Google para sincronizar.'); return showToast && toast('Entre com Google para sincronizar.'); }
   try {
-    setSync('syncing','Sincronizando...','Salvando alterações na nuvem.');
-    const payload = cloud.familyId
-      ? familyPayload()
-      : {state, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), localUpdatedAt: state.updatedAt, appVersion: window.ALBUM_DATA.version};
-    await doc.set(payload, {merge:true});
+    setSync('syncing','Sincronizando...', familyCode ? `Salvando na família ${familyCode}.` : 'Salvando alterações na nuvem.');
+    await doc.set({
+      state,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      localUpdatedAt: state.updatedAt,
+      appVersion: window.ALBUM_DATA.version,
+      mode: currentCloudMode(),
+      familyCode: familyCode || null,
+      updatedBy: cloud.user ? { uid: cloud.user.uid, email: cloud.user.email || '' } : null
+    }, {merge:true});
     cloud.lastSyncAt = new Date();
-    setSync('ok','Sincronizado',`${activeCloudLabel()} atualizado.`);
+    setSync('ok','Sincronizado', familyCode ? `Família ${familyCode}` : 'Alterações salvas na nuvem.');
     if (showToast) toast('Sincronizado.');
   } catch(e){ setSync('error','Erro ao sincronizar', e.message || 'Falha ao salvar.'); if (showToast) toast('Erro ao sincronizar.'); console.warn(e); }
 }
-async function loadCloud(showToast = true){
+async function loadCloud(showToast = true, options = {}){
   const doc = cloudDoc();
   if (!doc) return showToast && toast('Entre com Google para sincronizar.');
   try {
-    setSync('syncing','Sincronizando...','Carregando dados da nuvem.');
+    setSync('syncing','Sincronizando...', familyCode ? `Carregando família ${familyCode}.` : 'Carregando dados da nuvem.');
     const snap = await doc.get();
-    if (!snap.exists || !snap.data().state) { setSync('ok','Sincronizado','Primeira sincronização será criada ao marcar ou sincronizar.'); return; }
+    if (!snap.exists || !snap.data().state) {
+      setSync('ok','Sincronizado', familyCode ? `Família ${familyCode} pronta.` : 'Primeiro backup será criado ao marcar ou sincronizar.');
+      return false;
+    }
     const remote = normalizeState(snap.data().state);
     const localTime = Date.parse(state.updatedAt || 0);
     const remoteTime = Date.parse(remote.updatedAt || 0);
-    if (remoteTime > localTime) {
+    if (options.preferRemote || remoteTime > localTime) {
       state = remote;
       saveState({skipCloud:true});
-      if (showToast) toast('Dados carregados da nuvem.');
+      if (showToast) toast(familyCode ? 'Coleção da família carregada.' : 'Dados carregados da nuvem.');
     }
     cloud.lastSyncAt = new Date();
-    setSync('ok','Sincronizado',`${activeCloudLabel()} atualizado.`);
-  } catch(e){ setSync('error','Erro ao sincronizar', e.message || 'Falha ao carregar.'); if (showToast) toast('Erro ao sincronizar.'); console.warn(e); }
+    setSync('ok','Sincronizado', familyCode ? `Família ${familyCode}` : 'Dados atualizados.');
+    return true;
+  } catch(e){ setSync('error','Erro ao sincronizar', e.message || 'Falha ao carregar.'); if (showToast) toast('Erro ao sincronizar.'); console.warn(e); return false; }
 }
 async function syncNow(showToast = true){
   if (!cloud.user) return showToast && toast('Entre com Google para sincronizar.');
-  await loadCloud(false);
+  const existed = await loadCloud(false);
+  if (!existed || !familyCode) await saveCloud(false);
+  if (showToast) toast(familyCode ? 'Família sincronizada.' : 'Sincronização concluída.');
+  startCloudListener();
+  render();
+}
+async function createFamilyMode(){
+  if (!cloud.user) return toast('Entre com Google antes de criar uma família.');
+  familyCode = generateFamilyCode();
+  localStorage.setItem(FAMILY_CODE_KEY, familyCode);
+  stopCloudListener();
   await saveCloud(false);
-  if (showToast) toast('Sincronização concluída.');
+  startCloudListener();
+  toast(`Família criada: ${familyCode}`);
+  render();
+}
+async function joinFamilyMode(rawCode){
+  const code = normalizeFamilyCode(rawCode);
+  if (!cloud.user) return toast('Entre com Google antes de entrar em uma família.');
+  if (!code || !code.startsWith('FAM-') || code.length < 8) return toast('Código da família inválido.');
+  familyCode = code;
+  localStorage.setItem(FAMILY_CODE_KEY, familyCode);
+  stopCloudListener();
+  const existed = await loadCloud(true, {preferRemote:true});
+  if (!existed) await saveCloud(false);
+  startCloudListener();
+  toast(`Você entrou na família ${familyCode}.`);
+  render();
+}
+async function leaveFamilyMode(){
+  if (!familyCode) return;
+  const oldCode = familyCode;
+  if (!confirm(`Voltar para sua coleção pessoal? Você sairá da família ${oldCode} neste aparelho.`)) return;
+  familyCode = '';
+  localStorage.removeItem(FAMILY_CODE_KEY);
+  stopCloudListener();
+  if (cloud.user) {
+    await loadCloud(true, {preferRemote:true});
+    startCloudListener();
+  }
+  toast('Você voltou para a coleção pessoal.');
   render();
 }
 window.addEventListener('online', () => { if (autoSync && cloud.user) syncNow(false); });
 window.addEventListener('offline', () => setSync('offline','Offline','Alterações ficam salvas localmente.'));
+
 
 function renderQuickResults(){
   const q = $('#markSearch').value.trim().toLowerCase();

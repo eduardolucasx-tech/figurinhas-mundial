@@ -6,23 +6,9 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    match /checklist_mundial_families/{familyId} {
-      allow list: if false;
-
-      allow create: if request.auth != null
-        && request.resource.data.members[request.auth.uid] == true;
-
-      // Permite abrir a família por código. O código é aleatório e compartilhado só com quem você quiser.
-      allow get: if request.auth != null;
-
-      // Quem já é membro pode editar. Quem recebeu o código pode entrar adicionando o próprio UID.
-      allow update: if request.auth != null
-        && (
-          resource.data.members[request.auth.uid] == true ||
-          request.resource.data.members[request.auth.uid] == true
-        );
-
-      allow delete: if false;
+    // Uso fechado: qualquer usuário logado com o código da família pode ler/gravar.
+    match /checklist_mundial_families/{familyCode} {
+      allow read, write: if request.auth != null;
     }
   }
 }
