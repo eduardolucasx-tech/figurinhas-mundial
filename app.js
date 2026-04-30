@@ -274,16 +274,12 @@ function renderAlbum(){
   const groups = [...new Set(window.ALBUM_DATA.teams.map(t => t.group))];
   const s = stats();
   $('#album').innerHTML = `
-    <div class="album-hero">
-      <div>
-        <span class="label">Meu álbum</span>
-        <h3>${s.owned}/${s.total} figurinhas</h3>
-        <p>${pct(s.progress)} completo · ${s.missing} faltantes · ${s.duplicates} repetidas · ${s.physical} no acervo físico</p>
-      </div>
-      <div class="album-hero-status" aria-label="Resumo do álbum">
+    <div class="album-hero album-hero-compact" aria-label="Resumo do álbum">
+      <div class="album-hero-status summary-only">
         <span>${pct(s.progress)} completo</span>
         <span>${s.missing} faltantes</span>
         <span>${s.duplicates} repetidas</span>
+        <span>${s.physical} no acervo físico</span>
       </div>
     </div>
     <div class="filters album-filters">

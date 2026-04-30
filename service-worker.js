@@ -1,4 +1,4 @@
-const CACHE='checklist-mundial-v071-clean-ui';
+const CACHE='checklist-mundial-v072-resumo-limpo';
 const FILES=['./','./index.html','./styles.css','./app.js',
 './data.js','./firebase-config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));});

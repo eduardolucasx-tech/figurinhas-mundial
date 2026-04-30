@@ -47,3 +47,11 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app-sh
 .top-actions{justify-content:flex-end}
 @media (max-width:1060px){.album-hero-status{width:100%;justify-content:flex-start}.album-tools-row{align-items:flex-start;flex-direction:column}.view-toggle{width:100%}.top-actions #syncNowBtn{display:inline-flex}}
 @media (max-width:560px){.album-hero-status span{font-size:11px;padding:7px 9px}.top-actions #syncNowBtn{display:inline-flex;width:100%}}
+
+/* v0.7.2 - resumo do álbum sem informações duplicadas */
+.album-hero-compact{min-height:92px;justify-content:flex-end;padding:24px}
+.album-hero-compact:before{width:210px;height:210px;right:-70px;bottom:-110px}
+.album-hero-compact .summary-only{width:100%;justify-content:flex-end}
+.album-hero-compact .summary-only span{background:#ffffff24;border-color:#ffffff44;box-shadow:0 8px 22px rgba(0,0,0,.08)}
+@media (max-width:1060px){.album-hero-compact{min-height:auto;justify-content:flex-start}.album-hero-compact .summary-only{justify-content:flex-start}}
+@media (max-width:560px){.album-hero-compact{padding:18px}.album-hero-compact .summary-only{display:grid;grid-template-columns:1fr 1fr;gap:8px}.album-hero-compact .summary-only span{text-align:center}}
