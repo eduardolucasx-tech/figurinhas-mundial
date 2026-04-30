@@ -1,4 +1,4 @@
-const CACHE='checklist-mundial-v06-manual-add';
+const CACHE='checklist-mundial-v07-ux-995';
 const FILES=['./','./index.html','./styles.css','./app.js',
 './data.js','./firebase-config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));});

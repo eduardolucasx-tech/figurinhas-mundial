@@ -17,17 +17,20 @@ const albumItems = (() => {
     type: i === 0 ? 'Escudo/seleção' : i === 12 ? 'Especial da seleção' : 'Figurinha',
     order: (teamIndex + 1) * 100 + i + 1
   })));
-  const specials = window.ALBUM_DATA.specialSections.flatMap((section, sectionIndex) => Array.from({length: section.count}, (_, i) => ({
-    id: `${section.code}-${String(i + 1).padStart(2, '0')}`,
-    code: section.code,
-    number: i + 1,
-    ref: refOf(section, i + 1),
-    group: section.group,
-    section: section.name,
-    name: '',
-    type: 'Extra',
-    order: 10000 + (sectionIndex + 1) * 100 + i + 1
-  })));
+  const specials = window.ALBUM_DATA.specialSections.flatMap((section, sectionIndex) => Array.from({length: section.count}, (_, i) => {
+    const number = (section.start ?? 1) + i;
+    return {
+      id: `${section.code}-${String(number).padStart(2, '0')}`,
+      code: section.code,
+      number,
+      ref: refOf(section, number),
+      group: section.group,
+      section: section.name,
+      name: '',
+      type: section.code === 'ZERO' ? 'Figurinha 00' : 'Extra',
+      order: section.code === 'ZERO' ? 0 : 10000 + (sectionIndex + 1) * 100 + number
+    };
+  }));
   return [...teams, ...specials];
 })();
 
@@ -53,7 +56,10 @@ let undoSnapshot = null;
 let packSession = [];
 
 function codeOf(obj){ return obj.displayCode || obj.code; }
-function refOf(obj, number){ return `${codeOf(obj)} ${String(number).padStart(2, '0')}`; }
+function refOf(obj, number){
+  if (obj.code === 'ZERO' || Number(number) === 0) return '00';
+  return `${codeOf(obj)} ${String(number).padStart(2, '0')}`;
+}
 function quantity(id){ return Math.max(0, Number(state.quantities[id] || 0)); }
 function extrasOf(item){ return Math.max(quantity(item.id) - 1, 0); }
 function itemById(id){ return albumItems.find(i => i.id === id); }
@@ -172,7 +178,8 @@ function sectionStats(sec){
   const items = albumItems.filter(i => i.code === sec.code);
   const owned = items.filter(i => quantity(i.id) > 0).length;
   const duplicates = items.reduce((sum, i) => sum + extrasOf(i), 0);
-  return {total: items.length, owned, missing: items.length - owned, duplicates, progress: items.length ? owned / items.length : 0};
+  const physical = items.reduce((sum, i) => sum + quantity(i.id), 0);
+  return {total: items.length, owned, missing: items.length - owned, duplicates, physical, progress: items.length ? owned / items.length : 0};
 }
 
 function setSync(status, label, detail = ''){
@@ -201,7 +208,7 @@ function setView(view){
   currentView = view;
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   $$('.view').forEach(v => v.classList.toggle('active', v.id === view));
-  $('#viewTitle').textContent = ({album:'Álbum', adicionar:'Adicionar figurinhas', listas:'Buscar e listas', trocas:'Repetidas e trocas', mapa:'Mapa visual', dashboard:'Resumo', config:'Conta & Sincronização'})[view];
+  $('#viewTitle').textContent = ({album:'Álbum', adicionar:'Adicionar figurinhas', listas:'Listas rápidas', trocas:'Trocas', mapa:'Mapa visual', dashboard:'Resumo', config:'Conta'})[view];
   render();
 }
 function render(){
@@ -278,6 +285,8 @@ function renderAlbum(){
         <button class="ghost" id="albumAddBtn">Adicionar</button>
         <button class="ghost" id="albumShowMissing">Faltantes</button>
         <button class="ghost" id="albumShowDup">Repetidas</button>
+        <button class="ghost" id="albumMapBtn">Mapa</button>
+        <button class="ghost" id="albumSummaryBtn">Resumo</button>
       </div>
     </div>
     <div class="filters album-filters">
@@ -304,6 +313,8 @@ function renderAlbum(){
   $('#albumAddBtn')?.addEventListener('click', () => setView('adicionar'));
   $('#albumShowMissing').addEventListener('click', () => { $('#statusFilter').value='missing'; updateFilterChips(); sync(); });
   $('#albumShowDup').addEventListener('click', () => { $('#statusFilter').value='duplicate'; updateFilterChips(); sync(); });
+  $('#albumMapBtn')?.addEventListener('click', () => setView('mapa'));
+  $('#albumSummaryBtn')?.addEventListener('click', () => setView('dashboard'));
   $$('.chip').forEach(btn => btn.addEventListener('click', () => { $('#statusFilter').value = btn.dataset.chip; updateFilterChips(); sync(); }));
   renderTeamList();
 }
@@ -370,7 +381,7 @@ function formatList(filter, mode='default'){
   sections.forEach(sec => {
     const items = albumItems.filter(i => i.code === sec.code && filter(i));
     if (items.length) {
-      const list = items.map(i => mode === 'dup' ? `${String(i.number).padStart(2,'0')} (+${extrasOf(i)} / x${quantity(i.id)})` : String(i.number).padStart(2,'0')).join(', ');
+      const list = items.map(i => { const n = i.number === 0 ? '00' : String(i.number).padStart(2,'0'); return mode === 'dup' ? `${n} (+${extrasOf(i)} / x${quantity(i.id)})` : n; }).join(', ');
       rows.push(`${codeOf(sec)} · ${sec.name}: ${list}`);
     }
   });
@@ -563,22 +574,35 @@ function renderQuickResults(){
 function openQuickAdd(){ $('#markDialog').showModal(); $('#markSearch').value=''; renderQuickResults(); setTimeout(() => $('#markSearch').focus(), 30); }
 
 
-// v0.6 - Adicionar figurinhas manualmente: rápido, confiável e sem câmera.
+// v0.7 - UX simplificada, total correto 995 e extras oficiais.
 function openAdicionar(){ setView('adicionar'); }
 function normalizeCodeInput(raw){
   return String(raw || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+}
+function normalizeInputCodeAlias(code){
+  const c = String(code || '').toUpperCase();
+  const aliases = { CC:'COC', COC:'COC', COCA:'COC', COLA:'COC', COCACOLA:'COC', FWC:'FWC', ZERO:'ZERO' };
+  return aliases[c] || c;
+}
+function codeMatches(item, rawCode){
+  const code = normalizeInputCodeAlias(rawCode);
+  return item.code === code || codeOf(item) === code || item.ref.split(' ')[0] === code;
 }
 function findStickerCandidates(raw){
   const text = normalizeCodeInput(raw);
   const matches = [];
 
-  // Aceita HAI 8, HAI08, HAI-08, hai 8, Haiti 8 e buscas por seleção/status.
+  // Aceita 00, HAI 8, HAI08, HAI-08, FWC 1, COC 1, CC 1 e buscas por seleção/status.
+  if (/^0{1,2}$/.test(text.replace(/[^0-9]/g,''))) {
+    const zero = albumItems.find(i => i.code === 'ZERO' && i.number === 0);
+    if (zero) return [zero];
+  }
   const compact = text.replace(/[^A-Z0-9]+/g,' ');
   const noSpace = text.replace(/[^A-Z0-9]/g,'');
   const patterns = [
-    /\b([A-Z]{3})\s*(\d{1,2})\b/g,
-    /\b([A-Z]{3})\s*-\s*(\d{1,2})\b/g,
-    /^([A-Z]{3})(\d{1,2})$/g
+    /\b([A-Z]{2,8})\s*(\d{1,2})\b/g,
+    /\b([A-Z]{2,8})\s*-\s*(\d{1,2})\b/g,
+    /^([A-Z]{2,8})(\d{1,2})$/g
   ];
   const sources = [` ${compact} `, noSpace];
 
@@ -589,8 +613,8 @@ function findStickerCandidates(raw){
       while ((m = re.exec(source)) !== null) {
         const code = m[1];
         const num = Number(m[2]);
-        if (!num || num > 99) continue;
-        const found = albumItems.filter(i => (i.ref.split(' ')[0] === code || i.code === code) && i.number === num);
+        if (Number.isNaN(num) || num > 99) continue;
+        const found = albumItems.filter(i => codeMatches(i, code) && i.number === num);
         found.forEach(item => { if (!matches.some(x => x.id === item.id)) matches.push(item); });
       }
     }
@@ -620,7 +644,7 @@ function renderAdicionar(){
       <div class="card add-hero-card">
         <span class="label">Modo pacotinho</span>
         <h3>Adicionar figurinhas</h3>
-        <p>Digite o código do verso da figurinha. Aceita formatos como <strong>HAI 8</strong>, <strong>HAI08</strong> ou <strong>HAI-08</strong>. Depois é só confirmar com <strong>+1</strong>.</p>
+        <p>Digite o código do verso da figurinha. Aceita formatos como <strong>HAI 8</strong>, <strong>HAI08</strong>, <strong>FWC 1</strong>, <strong>COC 1</strong> ou <strong>00</strong>. Depois é só confirmar com <strong>+1</strong>.</p>
         <div class="add-input-row">
           <input id="addCodeInput" type="search" inputmode="text" autocomplete="off" placeholder="Digite o código: HAI 8" />
           <button class="primary" id="addFindBtn">Buscar</button>
@@ -630,6 +654,8 @@ function renderAdicionar(){
           <button class="pill-btn" data-fill-code="BRA 10">BRA 10</button>
           <button class="pill-btn" data-fill-code="HAI 8">HAI 8</button>
           <button class="pill-btn" data-fill-code="MEX 3">MEX 3</button>
+          <button class="pill-btn" data-fill-code="FWC 1">FWC 1</button>
+          <button class="pill-btn" data-fill-code="00">00</button>
         </div>
         <div id="addResults" class="add-results"></div>
       </div>
@@ -683,7 +709,7 @@ function renderAdicionarResults(){
     return;
   }
   if (!candidates.length) {
-    box.innerHTML = `<div class="empty add-empty">Não encontrei esse código. Confira se está no formato <strong>3 letras + número</strong>, tipo HAI 8.</div>`;
+    box.innerHTML = `<div class="empty add-empty">Não encontrei esse código. Confira se está no formato <strong>3 letras + número</strong>, tipo HAI 8, FWC 1, COC 1 ou 00.</div>`;
     return;
   }
   box.innerHTML = candidates.map(i => `

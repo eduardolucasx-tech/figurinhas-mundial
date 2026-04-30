@@ -1,6 +1,6 @@
 window.ALBUM_DATA = {
   appName: 'Checklist Mundial',
-  version: '0.6.0-manual-add',
+  version: '0.7.0-ux-simplificada-995',
   teams: [
     {group:'A', code:'MEX', name:'México'}, {group:'A', code:'RSA', name:'África do Sul'}, {group:'A', code:'KOR', name:'Coreia do Sul'}, {group:'A', code:'CZE', name:'República Tcheca'},
     {group:'B', code:'CAN', name:'Canadá'}, {group:'B', code:'QAT', name:'Qatar'}, {group:'B', code:'SUI', name:'Suíça'}, {group:'B', code:'BIH', name:'Bósnia'},
@@ -16,9 +16,8 @@ window.ALBUM_DATA = {
     {group:'L', code:'ENG', name:'Inglaterra'}, {group:'L', code:'GHA', name:'Gana'}, {group:'L', code:'CRO', name:'Croácia'}, {group:'L', code:'PAN', name:'Panamá'}
   ],
   specialSections: [
-    {group:'EXTRAS', code:'ABR', name:'Abertura', count: 1},
-    {group:'EXTRAS', code:'SED', name:'Sedes e cidades', count: 8},
-    {group:'EXTRAS', code:'HIS', name:'História do Mundial', count: 20},
-    {group:'EXTRAS', code:'SPC', displayCode:'ESP', name:'Especiais', count: 14}
+    {group:'EXTRAS', code:'ZERO', displayCode:'00', name:'Figurinha 00 · Abertura', count: 1, start: 0},
+    {group:'EXTRAS', code:'FWC', name:'Figurinhas especiais FWC', count: 20},
+    {group:'EXTRAS', code:'COC', displayCode:'COC', name:'Coca-Cola', count: 14}
   ]
 };
