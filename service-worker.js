@@ -1,4 +1,4 @@
-const CACHE='checklist-mundial-v05-scanner-guide';
+const CACHE='checklist-mundial-v05-camera25';
 const FILES=['./','./index.html','./styles.css','./app.js',
   './scanner-guide.png','./data.js','./firebase-config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));});

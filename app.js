@@ -564,16 +564,18 @@ function renderQuickResults(){
 function openQuickAdd(){ $('#markDialog').showModal(); $('#markSearch').value=''; renderQuickResults(); setTimeout(() => $('#markSearch').focus(), 30); }
 
 // v0.4 - Scanner de código de figurinha (processamento local, sem armazenamento de imagens)
+const SCANNER_MAX_SECONDS = 25;
+const SCANNER_MAX_MS = SCANNER_MAX_SECONDS * 1000;
 let scanner = { stream:null, timer:null, interval:null, active:false, endsAt:0, lastText:'', candidates:[], scanCount:0 };
 function renderScanner(){
   const active = scanner.active;
-  const remaining = active ? Math.max(0, Math.ceil((scanner.endsAt - Date.now()) / 1000)) : 10;
+  const remaining = active ? Math.max(0, Math.ceil((scanner.endsAt - Date.now()) / 1000)) : SCANNER_MAX_SECONDS;
   $('#scanner').innerHTML = `
     <div class="scanner-layout scanner-layout-v05">
       <div class="card scanner-card scanner-main-card">
         <span class="label">Scanner mobile</span>
         <h3>Escanear código da figurinha</h3>
-        <p>Centralize o verso da figurinha e coloque a cápsula do código no guia superior direito. A leitura dura no máximo <strong>10 segundos</strong>.</p>
+        <p>Centralize o verso da figurinha e coloque a cápsula do código no guia superior direito. A leitura dura no máximo <strong>25 segundos</strong>.</p>
         <div class="privacy-note">🔒 Processamento local: nenhuma imagem ou vídeo é salvo, enviado para a nuvem, Firebase ou Vercel. Só o código confirmado vira dado da coleção.</div>
         <div class="scanner-stage scanner-v05 ${active ? 'active' : 'idle'}">
           <video id="scannerVideo" playsinline muted></video>
@@ -593,7 +595,7 @@ function renderScanner(){
         <canvas id="scannerCanvas" hidden></canvas>
         <div class="scanner-status" id="scannerStatus">${active ? `Escaneando... ${remaining}s` : 'Pronto para iniciar.'}</div>
         <div class="button-row">
-          <button class="primary" id="startScanner" ${active ? 'disabled' : ''}>Usar câmera por 10s</button>
+          <button class="primary" id="startScanner" ${active ? 'disabled' : ''}>Usar câmera por 25s</button>
           <button class="ghost" id="stopScanner" ${active ? '' : 'disabled'}>Parar câmera</button>
         </div>
       </div>
@@ -630,14 +632,14 @@ async function startScanner(){
   try {
     scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio:false });
     scanner.active = true;
-    scanner.endsAt = Date.now() + 10000;
+    scanner.endsAt = Date.now() + SCANNER_MAX_MS;
     scanner.candidates = [];
     scanner.scanCount = 0;
     renderScanner();
     attachStreamToVideo();
-    scanner.timer = setTimeout(() => finishScannerTimeout(), 10000);
-    scanner.interval = setInterval(scanFrameOnce, 2200);
-    setTimeout(scanFrameOnce, 1200);
+    scanner.timer = setTimeout(() => finishScannerTimeout(), SCANNER_MAX_MS);
+    scanner.interval = setInterval(scanFrameOnce, 2000);
+    setTimeout(scanFrameOnce, 1600);
   } catch(e){
     console.warn(e);
     toast('Não consegui acessar a câmera.');
@@ -662,7 +664,7 @@ function finishScannerTimeout(){
   setTimeout(() => {
     if (currentView === 'scanner') {
       renderScanner();
-      setScannerStatus('Tempo de 10s encerrado. Nenhuma imagem foi salva. Tente novamente ou digite o código.');
+      setScannerStatus('Tempo de 25s encerrado. Nenhuma imagem foi salva. Tente novamente ou digite o código.');
     }
   }, 30);
 }
