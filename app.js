@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
+const THEME_VERSION = '0.8-premium-copa';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const AUTO_SYNC_KEY = 'checklist-mundial-auto-sync';
@@ -55,6 +56,23 @@ let cloudSaveTimer = null;
 let cloud = { ready:false, auth:null, db:null, user:null, provider:null, lastSyncAt:null, loading:false };
 let undoSnapshot = null;
 let packSession = [];
+
+
+const FLAGS = {
+  MEX:'🇲🇽', RSA:'🇿🇦', KOR:'🇰🇷', CZE:'🇨🇿', CAN:'🇨🇦', BIH:'🇧🇦', QAT:'🇶🇦', SUI:'🇨🇭',
+  BRA:'🇧🇷', MAR:'🇲🇦', HAI:'🇭🇹', SCO:'🏴', USA:'🇺🇸', PAR:'🇵🇾', AUS:'🇦🇺', TUR:'🇹🇷',
+  GER:'🇩🇪', CUW:'🇨🇼', CIV:'🇨🇮', ECU:'🇪🇨', NED:'🇳🇱', JPN:'🇯🇵', SWE:'🇸🇪', TUN:'🇹🇳',
+  BEL:'🇧🇪', EGY:'🇪🇬', IRN:'🇮🇷', NZL:'🇳🇿', ESP:'🇪🇸', CPV:'🇨🇻', KSA:'🇸🇦', URU:'🇺🇾',
+  FRA:'🇫🇷', SEN:'🇸🇳', IRQ:'🇮🇶', NOR:'🇳🇴', ARG:'🇦🇷', ALG:'🇩🇿', AUT:'🇦🇹', JOR:'🇯🇴',
+  POR:'🇵🇹', COD:'🇨🇩', UZB:'🇺🇿', COL:'🇨🇴', ENG:'🏴', CRO:'🇭🇷', GHA:'🇬🇭', PAN:'🇵🇦',
+  ZERO:'⭐', FWC:'🏆', COC:'🥤'
+};
+function flagOf(code){ return FLAGS[code] || '⚽'; }
+function sectionVisual(sec){
+  const code = codeOf(sec);
+  const hostTone = sec.code === 'USA' ? 'usa' : sec.code === 'MEX' ? 'mex' : sec.code === 'CAN' ? 'can' : '';
+  return `<div class="section-visual ${hostTone}"><span class="flag-badge" aria-hidden="true">${flagOf(sec.code)}</span><span class="visual-ball">⚽</span><i></i><b></b></div>`;
+}
 
 function codeOf(obj){ return obj.displayCode || obj.code; }
 function refOf(obj, number){
@@ -282,16 +300,17 @@ function renderAlbum(){
   const acervoFisico = Number.isFinite(Number(s.physical)) ? Number(s.physical) : tenhoFigurinhas + repetidasFigurinhas;
   const progressoAlbum = totalFigurinhas ? tenhoFigurinhas / totalFigurinhas : 0;
   $('#album').innerHTML = `
-    <div class="album-hero album-hero-compact album-hero-total" aria-label="Resumo do álbum">
+    <div class="album-hero album-hero-compact album-hero-total premium-hero" aria-label="Resumo do álbum">
       <div class="album-hero-main">
-        <span class="label">Meu álbum</span>
+        <span class="label">Meu álbum da Copa</span>
         <h3>${tenhoFigurinhas}/${totalFigurinhas} figurinhas</h3>
+        <p class="hero-subline">Coleção 2026 · USA • México • Canadá</p>
       </div>
       <div class="album-hero-status summary-only">
-        <span>${pct(progressoAlbum)} completo</span>
-        <span>${faltantesFigurinhas} faltantes</span>
-        <span>${repetidasFigurinhas} repetidas</span>
-        <span>${acervoFisico} no acervo físico</span>
+        <span><b>${pct(progressoAlbum)}</b> completo</span>
+        <span><b>${faltantesFigurinhas}</b> faltantes</span>
+        <span><b>${repetidasFigurinhas}</b> repetidas</span>
+        <span><b>${acervoFisico}</b> no acervo físico</span>
       </div>
     </div>
     <div class="filters album-filters">
@@ -335,10 +354,13 @@ function renderTeamList(){
     const items = albumItems.filter(i => (i.sectionKey || i.code) === key).filter(item => matchItem(item, q, status));
     if (!items.length) return '';
     const st = sectionStats(sec);
-    return `<article class="team-card album-team ${st.progress === 1 ? 'complete' : ''} ${st.progress >= .75 ? 'almost' : st.progress <= .25 ? 'low' : 'mid'}">
-      <div class="team-head"><div><span class="badge">${sec.group === 'EXTRAS' ? 'Extras' : `Grupo ${sec.group}`}</span><h3>${codeOf(sec)} · ${sec.name}</h3><p>${st.owned}/${st.total} figurinhas · ${pct(st.progress)}</p></div><strong>${st.owned}/${st.total}</strong></div>
-      <div class="progress-track muted-track"><span class="progress-fill" style="width:${pct(st.progress)}"></span></div>
-      <div class="team-mini-stats"><span>${st.missing} faltam</span><span>${st.duplicates} repetidas</span><span>${st.physical} físicas</span></div>
+    return `<article class="team-card album-team premium-team ${st.progress === 1 ? 'complete' : ''} ${st.progress >= .75 ? 'almost' : st.progress <= .25 ? 'low' : 'mid'}">
+      <div class="premium-team-top">
+        ${sectionVisual(sec)}
+        <div class="team-head"><div><span class="badge">${sec.group === 'EXTRAS' ? 'Extras' : `Grupo ${sec.group}`}</span><h3><span class="team-flag" aria-hidden="true">${flagOf(sec.code)}</span>${codeOf(sec)} · ${sec.name}</h3><p>${st.owned}/${st.total} figurinhas · ${pct(st.progress)}</p></div><strong>${st.owned}/${st.total}</strong></div>
+        <div class="progress-track muted-track"><span class="progress-fill" style="width:${pct(st.progress)}"></span></div>
+        <div class="team-mini-stats"><span>${st.missing} faltam</span><span>${st.duplicates} repetidas</span><span>${st.physical} físicas</span></div>
+      </div>
       ${st.progress === 1 ? '<div class="complete-ribbon">Completa</div>' : ''}
       <div class="sticker-grid">${items.map(stickerButton).join('')}</div>
     </article>`;
@@ -375,7 +397,7 @@ function groupMap(group){
   const teams = window.ALBUM_DATA.teams.filter(t => t.group === group);
   return `<section class="group-block"><div class="group-title"><h3>Grupo ${group}</h3><span class="badge">${teams.length} seleções</span></div><div class="map-teams">${teams.map(t => {
     const st = teamStats(t.code);
-    return `<div class="team-card mini-team ${st.progress === 1 ? 'complete' : ''}"><div class="team-head"><h3>${t.code} · ${t.name}</h3><strong>${pct(st.progress)}</strong></div><div class="tiny-map">${teamItems(t.code).map(i => `<button class="tiny ${statusClass(i)}" data-id="${i.id}" title="${i.ref} · qtd ${quantity(i.id)}">${i.number}${quantity(i.id)>1?`×${quantity(i.id)}`:''}</button>`).join('')}</div></div>`;
+    return `<div class="team-card mini-team ${st.progress === 1 ? 'complete' : ''}"><div class="team-head"><h3><span class="team-flag" aria-hidden="true">${flagOf(t.code)}</span>${t.code} · ${t.name}</h3><strong>${pct(st.progress)}</strong></div><div class="tiny-map">${teamItems(t.code).map(i => `<button class="tiny ${statusClass(i)}" data-id="${i.id}" title="${i.ref} · qtd ${quantity(i.id)}">${i.number}${quantity(i.id)>1?`×${quantity(i.id)}`:''}</button>`).join('')}</div></div>`;
   }).join('')}</div></section>`;
 }
 
@@ -653,7 +675,7 @@ function addFromAdicionar(id, delta=1){
 function renderAdicionar(){
   $('#adicionar').innerHTML = `
     <div class="add-page">
-      <div class="card add-hero-card">
+      <div class="card add-hero-card premium-add-card">
         <span class="label">Modo pacotinho</span>
         <h3>Adicionar figurinhas</h3>
         <p>Digite o código do verso da figurinha. Aceita formatos como <strong>HAI 8</strong>, <strong>HAI08</strong>, <strong>FWC 1</strong>, <strong>COC 1</strong> ou <strong>00</strong>. Depois é só confirmar com <strong>+1</strong>.</p>
@@ -727,7 +749,7 @@ function renderAdicionarResults(){
   box.innerHTML = candidates.map(i => `
     <div class="result-item add-result ${statusClass(i)}">
       <div>
-        <strong>${i.ref}</strong><br>
+        <strong><span class="team-flag" aria-hidden="true">${flagOf(i.code)}</span>${i.ref}</strong><br>
         <span class="muted">${i.section} · ${statusLabel(i)} · qtd ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span>
       </div>
       <div class="qty-inline">
