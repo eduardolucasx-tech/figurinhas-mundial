@@ -1,3 +1,5 @@
+// Configuração Firebase do app Checklist Mundial
+// Esta API key é pública para apps web Firebase; a segurança real fica nas regras do Firestore.
 window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyB85glvfZCnQEvEahEvuXkipJDk5i0JE4o",
   authDomain: "figurinhas-mundial.firebaseapp.com",

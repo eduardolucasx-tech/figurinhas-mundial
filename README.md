@@ -1,35 +1,32 @@
-# Checklist Mundial — PWA com contas e nuvem
+# Checklist Mundial v0.2
 
-App web/PWA para controle de cromos, com dashboard, mapa visual, listas de faltantes/repetidas, backup JSON e sincronização por usuário usando Firebase.
+App/PWA para controle de figurinhas do álbum, com login Google e sincronização por usuário via Firebase/Firestore.
 
-## Como publicar na Vercel
+## Novidades da v0.2
 
-Caminho simples com terminal:
+- Sincronização automática por padrão.
+- Remoção da confusão entre “Salvar na nuvem” e “Carregar da nuvem”.
+- Botão único: **Sincronizar agora**.
+- Status visual de sincronização no topo.
+- “Cromo” trocado por **figurinha** no app.
+- Quantidade ilimitada por figurinha.
+- Repetidas calculadas como `quantidade - 1`.
+- Cards coloridos por status: falta, tenho, repetida e troca/reserva.
+- Botões `+` e `-` para controle rápido do acervo.
+- Tela de trocas com cópia de faltantes e repetidas.
+- Histórico de alterações e botão desfazer.
+- Layout mais mobile-first com navegação inferior no celular.
 
-```bash
-npm install
-npx vercel login
-npx vercel --prod
+## Firestore Rules recomendadas
+
+```js
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /checklist_mundial_users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
 ```
-
-A Vercel vai devolver um link público no fim do deploy.
-
-Caminho com GitHub:
-
-1. Crie um repositório no GitHub.
-2. Envie todos os arquivos desta pasta.
-3. Acesse https://vercel.com/new
-4. Importe o repositório.
-5. Framework preset: `Other`.
-6. Build command: deixe vazio.
-7. Output directory: deixe vazio ou `.`.
-8. Deploy.
-
-## Como ativar conta por usuário
-
-Veja `PASSO_A_PASSO_PUBLICAR.md`.
-
-## Segurança
-
-Use as regras do arquivo `FIREBASE_RULES.txt` no Firestore. Elas fazem cada usuário ler e gravar apenas o próprio documento.
-DEPLOY INICIAL

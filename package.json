@@ -1,16 +1,1 @@
-{
-  "name": "checklist-mundial-pwa",
-  "version": "2.0.0",
-  "private": true,
-  "description": "PWA de checklist de cromos com login Google e sincronização Firebase.",
-  "scripts": {
-    "dev": "npx serve .",
-    "start": "npx serve .",
-    "deploy": "vercel --prod"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "serve": "latest",
-    "vercel": "latest"
-  }
-}
+{"scripts":{"start":"vite --host 0.0.0.0","dev":"vite --host 0.0.0.0","build":"mkdir -p dist && cp -r index.html app.js data.js styles.css firebase-config.js manifest.webmanifest icon.svg service-worker.js README.md dist/","preview":"vite preview --host 0.0.0.0"},"dependencies":{"@vitejs/plugin-react":"latest","vite":"latest","react":"latest","react-dom":"latest"},"devDependencies":{}}
