@@ -201,3 +201,22 @@ body:before{
 @media (max-width:560px){
   .topbar{border-radius:22px}.premium-hero:after{font-size:58px;right:26px;top:30px}.album-hero-total .summary-only{grid-template-columns:1fr 1fr}.album-hero-status span{min-width:0}.section-visual{height:92px}.team-list.album-grid{gap:14px}.premium-team .team-head h3{font-size:18px}.premium-team .sticker-grid{grid-template-columns:repeat(4,1fr);padding:0 12px 12px}.premium-team-top{padding:12px 12px 0}.flag-badge{width:48px;height:48px;border-radius:16px;font-size:26px}.visual-ball{font-size:28px}.filters{gap:8px}
 }
+
+/* v0.8.2 — bandeiras locais em SVG e alinhamento premium desktop */
+.flag-img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(5,23,52,.08)}
+.flag-badge{overflow:hidden;padding:0;border-radius:18px;background:#fff;width:58px;height:42px;left:18px;top:18px;box-shadow:0 14px 26px rgba(0,0,0,.18), inset 0 0 0 1px rgba(255,255,255,.55)}
+.flag-badge .flag-img{border-radius:16px}
+.team-flag{display:inline-flex;align-items:center;justify-content:center;width:28px;height:20px;margin-right:8px;border-radius:6px;vertical-align:-4px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(5,23,52,.08)}
+.team-flag .flag-img{border-radius:5px}
+.special-mark{display:grid;place-items:center;width:100%;height:100%;font-size:22px;line-height:1}
+.flag-badge .special-mark{font-size:26px}
+.premium-team-top{display:block}
+.section-visual{height:104px;margin-bottom:13px;border-radius:19px;background:linear-gradient(135deg,var(--banner-1,#061a46) 0%,var(--banner-2,#0b3b8f) 46%,var(--banner-3,#0b7b73) 100%)}
+.section-visual:before{background:linear-gradient(135deg,transparent 0 33%,var(--stripe-1,rgba(255,64,86,.82)) 33% 42%,transparent 42% 51%,var(--stripe-2,rgba(244,195,91,.75)) 51% 58%,transparent 58% 100%),radial-gradient(circle at 83% 22%,var(--banner-glow,rgba(255,255,255,.20)),transparent 18%)}
+.section-visual i{right:20px;bottom:-10px;width:84px;height:84px;opacity:.15;background:radial-gradient(circle at 50% 50%,#fff 0 12%,transparent 13%),repeating-conic-gradient(#fff 0 8deg,var(--banner-ball,#061a46) 8deg 16deg)}
+.section-visual b{left:22px;bottom:17px;width:86px;height:34px;opacity:.26;border-left-color:var(--field-line,rgba(255,255,255,.65));border-bottom-color:var(--field-line,rgba(255,255,255,.65))}
+.section-visual .visual-ball{right:22px;bottom:18px;font-size:28px;opacity:.55}
+.premium-team .team-head h3{display:flex;align-items:center;gap:0;line-height:1.15}
+@media (max-width: 760px){
+  .flag-badge{width:48px;height:35px;border-radius:15px;left:14px;top:14px}.flag-badge .flag-img{border-radius:13px}.team-flag{width:25px;height:18px}.section-visual{height:92px}.section-visual .visual-ball{font-size:24px}
+}

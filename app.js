@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.8-premium-copa';
+const THEME_VERSION = '0.8.3-premium-copa-banners-nacionais';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const AUTO_SYNC_KEY = 'checklist-mundial-auto-sync';
@@ -59,19 +59,90 @@ let packSession = [];
 
 
 const FLAGS = {
-  MEX:'🇲🇽', RSA:'🇿🇦', KOR:'🇰🇷', CZE:'🇨🇿', CAN:'🇨🇦', BIH:'🇧🇦', QAT:'🇶🇦', SUI:'🇨🇭',
-  BRA:'🇧🇷', MAR:'🇲🇦', HAI:'🇭🇹', SCO:'🏴', USA:'🇺🇸', PAR:'🇵🇾', AUS:'🇦🇺', TUR:'🇹🇷',
-  GER:'🇩🇪', CUW:'🇨🇼', CIV:'🇨🇮', ECU:'🇪🇨', NED:'🇳🇱', JPN:'🇯🇵', SWE:'🇸🇪', TUN:'🇹🇳',
-  BEL:'🇧🇪', EGY:'🇪🇬', IRN:'🇮🇷', NZL:'🇳🇿', ESP:'🇪🇸', CPV:'🇨🇻', KSA:'🇸🇦', URU:'🇺🇾',
-  FRA:'🇫🇷', SEN:'🇸🇳', IRQ:'🇮🇶', NOR:'🇳🇴', ARG:'🇦🇷', ALG:'🇩🇿', AUT:'🇦🇹', JOR:'🇯🇴',
-  POR:'🇵🇹', COD:'🇨🇩', UZB:'🇺🇿', COL:'🇨🇴', ENG:'🏴', CRO:'🇭🇷', GHA:'🇬🇭', PAN:'🇵🇦',
-  ZERO:'⭐', FWC:'🏆', COC:'🥤'
+  MEX:'flags/mex.svg', RSA:'flags/rsa.svg', KOR:'flags/kor.svg', CZE:'flags/cze.svg', CAN:'flags/can.svg', BIH:'flags/bih.svg', QAT:'flags/qat.svg', SUI:'flags/sui.svg',
+  BRA:'flags/bra.svg', MAR:'flags/mar.svg', HAI:'flags/hai.svg', SCO:'flags/sco.svg', USA:'flags/usa.svg', PAR:'flags/par.svg', AUS:'flags/aus.svg', TUR:'flags/tur.svg',
+  GER:'flags/ger.svg', CUW:'flags/cuw.svg', CIV:'flags/civ.svg', ECU:'flags/ecu.svg', NED:'flags/ned.svg', JPN:'flags/jpn.svg', SWE:'flags/swe.svg', TUN:'flags/tun.svg',
+  BEL:'flags/bel.svg', EGY:'flags/egy.svg', IRN:'flags/irn.svg', NZL:'flags/nzl.svg', ESP:'flags/esp.svg', CPV:'flags/cpv.svg', KSA:'flags/ksa.svg', URU:'flags/uru.svg',
+  FRA:'flags/fra.svg', SEN:'flags/sen.svg', IRQ:'flags/irq.svg', NOR:'flags/nor.svg', ARG:'flags/arg.svg', ALG:'flags/alg.svg', AUT:'flags/aut.svg', JOR:'flags/jor.svg',
+  POR:'flags/por.svg', COD:'flags/cod.svg', UZB:'flags/uzb.svg', COL:'flags/col.svg', ENG:'flags/eng.svg', CRO:'flags/cro.svg', GHA:'flags/gha.svg', PAN:'flags/pan.svg'
 };
-function flagOf(code){ return FLAGS[code] || '⚽'; }
+const BANNER_THEMES = {
+  DEFAULT:{bg1:'#0b234a', bg2:'#0b4f8a', bg3:'#12a57a', stripe1:'rgba(255,64,86,.82)', stripe2:'rgba(244,195,91,.75)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.58)', ball:'#0b234a'},
+  ZERO:{bg1:'#17314d', bg2:'#0f7a4f', bg3:'#f4c35b', stripe1:'rgba(255,255,255,.55)', stripe2:'rgba(255,64,86,.40)', glow:'rgba(244,195,91,.30)', line:'rgba(255,255,255,.6)', ball:'#17314d'},
+  FWC:{bg1:'#3a1b6f', bg2:'#7b31b9', bg3:'#e5b73b', stripe1:'rgba(255,255,255,.40)', stripe2:'rgba(229,183,59,.55)', glow:'rgba(255,255,255,.22)', line:'rgba(255,255,255,.6)', ball:'#3a1b6f'},
+  COC:{bg1:'#8f1020', bg2:'#d62839', bg3:'#ffffff', stripe1:'rgba(255,255,255,.65)', stripe2:'rgba(244,195,91,.35)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#8f1020'},
+  MEX:{bg1:'#006847', bg2:'#ffffff', bg3:'#ce1126', stripe1:'rgba(0,104,71,.55)', stripe2:'rgba(206,17,38,.68)', glow:'rgba(255,255,255,.26)', line:'rgba(255,255,255,.66)', ball:'#006847'},
+  RSA:{bg1:'#002395', bg2:'#007a4d', bg3:'#ffb612', stripe1:'rgba(238,51,78,.82)', stripe2:'rgba(255,255,255,.45)', glow:'rgba(255,182,18,.20)', line:'rgba(255,255,255,.62)', ball:'#002395'},
+  KOR:{bg1:'#ffffff', bg2:'#e8ecf6', bg3:'#1d4f91', stripe1:'rgba(205,46,58,.85)', stripe2:'rgba(0,71,160,.78)', glow:'rgba(255,255,255,.25)', line:'rgba(29,79,145,.35)', ball:'#0b234a'},
+  CZE:{bg1:'#11457e', bg2:'#ffffff', bg3:'#d7141a', stripe1:'rgba(255,255,255,.50)', stripe2:'rgba(215,20,26,.72)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.6)', ball:'#11457e'},
+  CAN:{bg1:'#d80621', bg2:'#ffffff', bg3:'#d80621', stripe1:'rgba(255,255,255,.65)', stripe2:'rgba(242,201,76,.32)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.64)', ball:'#8c1020'},
+  BIH:{bg1:'#002f6c', bg2:'#005bbb', bg3:'#f7d048', stripe1:'rgba(255,255,255,.42)', stripe2:'rgba(247,208,72,.65)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.58)', ball:'#002f6c'},
+  QAT:{bg1:'#8a1538', bg2:'#5a0d23', bg3:'#ffffff', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(138,21,56,.32)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.58)', ball:'#5a0d23'},
+  SUI:{bg1:'#d52b1e', bg2:'#c41e12', bg3:'#ffffff', stripe1:'rgba(255,255,255,.60)', stripe2:'rgba(255,255,255,.22)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.64)', ball:'#7c1510'},
+  BRA:{bg1:'#009b3a', bg2:'#ffdf00', bg3:'#002776', stripe1:'rgba(255,255,255,.55)', stripe2:'rgba(0,39,118,.60)', glow:'rgba(255,223,0,.16)', line:'rgba(255,255,255,.62)', ball:'#002776'},
+  MAR:{bg1:'#c1272d', bg2:'#9e1f23', bg3:'#006233', stripe1:'rgba(255,255,255,.26)', stripe2:'rgba(0,98,51,.55)', glow:'rgba(255,255,255,.14)', line:'rgba(255,255,255,.54)', ball:'#7c171b'},
+  HAI:{bg1:'#00209f', bg2:'#d21034', bg3:'#ffffff', stripe1:'rgba(255,255,255,.56)', stripe2:'rgba(210,16,52,.38)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#00209f'},
+  SCO:{bg1:'#005eb8', bg2:'#2877c9', bg3:'#ffffff', stripe1:'rgba(255,255,255,.68)', stripe2:'rgba(0,94,184,.32)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#0a3f80'},
+  USA:{bg1:'#0a3161', bg2:'#ffffff', bg3:'#b31942', stripe1:'rgba(255,255,255,.68)', stripe2:'rgba(179,25,66,.60)', glow:'rgba(255,255,255,.20)', line:'rgba(255,255,255,.62)', ball:'#0a3161'},
+  PAR:{bg1:'#d52b1e', bg2:'#ffffff', bg3:'#0038a8', stripe1:'rgba(255,255,255,.64)', stripe2:'rgba(0,56,168,.45)', glow:'rgba(255,255,255,.20)', line:'rgba(255,255,255,.62)', ball:'#0038a8'},
+  AUS:{bg1:'#012169', bg2:'#1e4aa8', bg3:'#ffffff', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(229,28,45,.48)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#012169'},
+  TUR:{bg1:'#e30a17', bg2:'#b80813', bg3:'#ffffff', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(255,255,255,.20)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.62)', ball:'#8f0b11'},
+  GER:{bg1:'#000000', bg2:'#dd0000', bg3:'#ffce00', stripe1:'rgba(255,255,255,.22)', stripe2:'rgba(255,206,0,.50)', glow:'rgba(255,255,255,.10)', line:'rgba(255,255,255,.56)', ball:'#1e1e1e'},
+  CUW:{bg1:'#002b7f', bg2:'#f9e814', bg3:'#ffffff', stripe1:'rgba(239,51,64,.72)', stripe2:'rgba(255,255,255,.42)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#002b7f'},
+  CIV:{bg1:'#f77f00', bg2:'#ffffff', bg3:'#009e60', stripe1:'rgba(255,255,255,.58)', stripe2:'rgba(0,158,96,.48)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.6)', ball:'#0d5b40'},
+  ECU:{bg1:'#fcd116', bg2:'#003893', bg3:'#ce1126', stripe1:'rgba(255,255,255,.40)', stripe2:'rgba(206,17,38,.60)', glow:'rgba(255,255,255,.14)', line:'rgba(255,255,255,.60)', ball:'#003893'},
+  NED:{bg1:'#ae1c28', bg2:'#ffffff', bg3:'#21468b', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(33,70,139,.46)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#21468b'},
+  JPN:{bg1:'#ffffff', bg2:'#f8f8f8', bg3:'#bc002d', stripe1:'rgba(188,0,45,.78)', stripe2:'rgba(255,255,255,.28)', glow:'rgba(255,255,255,.18)', line:'rgba(188,0,45,.28)', ball:'#bc002d'},
+  SWE:{bg1:'#006aa7', bg2:'#fecc00', bg3:'#0f7fb8', stripe1:'rgba(254,204,0,.70)', stripe2:'rgba(255,255,255,.28)', glow:'rgba(254,204,0,.16)', line:'rgba(255,255,255,.56)', ball:'#006aa7'},
+  TUN:{bg1:'#e70013', bg2:'#be0010', bg3:'#ffffff', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(255,255,255,.18)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.62)', ball:'#87000c'},
+  BEL:{bg1:'#000000', bg2:'#ffd90c', bg3:'#ef3340', stripe1:'rgba(255,255,255,.18)', stripe2:'rgba(239,51,64,.55)', glow:'rgba(255,255,255,.10)', line:'rgba(255,255,255,.58)', ball:'#000000'},
+  EGY:{bg1:'#ce1126', bg2:'#ffffff', bg3:'#000000', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(206,17,38,.34)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.60)', ball:'#000000'},
+  IRN:{bg1:'#239f40', bg2:'#ffffff', bg3:'#da0000', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(218,0,0,.46)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.60)', ball:'#239f40'},
+  NZL:{bg1:'#00247d', bg2:'#013a9a', bg3:'#ffffff', stripe1:'rgba(204,20,43,.78)', stripe2:'rgba(255,255,255,.42)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.60)', ball:'#00247d'},
+  ESP:{bg1:'#aa151b', bg2:'#f1bf00', bg3:'#aa151b', stripe1:'rgba(255,255,255,.24)', stripe2:'rgba(241,191,0,.52)', glow:'rgba(255,255,255,.12)', line:'rgba(255,255,255,.58)', ball:'#7c1317'},
+  CPV:{bg1:'#003893', bg2:'#ffffff', bg3:'#cf2027', stripe1:'rgba(241,190,72,.72)', stripe2:'rgba(255,255,255,.48)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.60)', ball:'#003893'},
+  KSA:{bg1:'#006c35', bg2:'#0a5a31', bg3:'#ffffff', stripe1:'rgba(255,255,255,.58)', stripe2:'rgba(255,255,255,.18)', glow:'rgba(255,255,255,.14)', line:'rgba(255,255,255,.62)', ball:'#0a5a31'},
+  URU:{bg1:'#ffffff', bg2:'#68bfe5', bg3:'#0038a8', stripe1:'rgba(255,255,255,.66)', stripe2:'rgba(243,196,0,.40)', glow:'rgba(255,255,255,.18)', line:'rgba(0,56,168,.28)', ball:'#0038a8'},
+  FRA:{bg1:'#0055a4', bg2:'#ffffff', bg3:'#ef4135', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(239,65,53,.48)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#0055a4'},
+  SEN:{bg1:'#00853f', bg2:'#fdef42', bg3:'#e31b23', stripe1:'rgba(255,255,255,.30)', stripe2:'rgba(227,27,35,.46)', glow:'rgba(255,255,255,.12)', line:'rgba(255,255,255,.56)', ball:'#00853f'},
+  IRQ:{bg1:'#ce1126', bg2:'#ffffff', bg3:'#000000', stripe1:'rgba(0,122,61,.68)', stripe2:'rgba(255,255,255,.30)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.60)', ball:'#000000'},
+  NOR:{bg1:'#ba0c2f', bg2:'#ffffff', bg3:'#00205b', stripe1:'rgba(255,255,255,.64)', stripe2:'rgba(0,32,91,.50)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#00205b'},
+  ARG:{bg1:'#74acdf', bg2:'#ffffff', bg3:'#74acdf', stripe1:'rgba(246,181,0,.58)', stripe2:'rgba(255,255,255,.36)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#3d83c2'},
+  ALG:{bg1:'#006233', bg2:'#ffffff', bg3:'#d21034', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(210,16,52,.46)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#006233'},
+  AUT:{bg1:'#ed2939', bg2:'#ffffff', bg3:'#ed2939', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(237,41,57,.32)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.62)', ball:'#ab1c28'},
+  JOR:{bg1:'#000000', bg2:'#ffffff', bg3:'#007a3d', stripe1:'rgba(206,17,38,.72)', stripe2:'rgba(255,255,255,.32)', glow:'rgba(255,255,255,.12)', line:'rgba(255,255,255,.58)', ball:'#000000'},
+  POR:{bg1:'#006600', bg2:'#da291c', bg3:'#f8d24a', stripe1:'rgba(255,255,255,.22)', stripe2:'rgba(248,210,74,.48)', glow:'rgba(255,255,255,.12)', line:'rgba(255,255,255,.58)', ball:'#006600'},
+  COD:{bg1:'#00a3e0', bg2:'#fcd116', bg3:'#ce1126', stripe1:'rgba(255,255,255,.55)', stripe2:'rgba(252,209,22,.48)', glow:'rgba(255,255,255,.16)', line:'rgba(255,255,255,.60)', ball:'#0077a3'},
+  UZB:{bg1:'#1eb53a', bg2:'#ffffff', bg3:'#0099b5', stripe1:'rgba(206,17,38,.66)', stripe2:'rgba(255,255,255,.46)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.60)', ball:'#0099b5'},
+  COL:{bg1:'#fcd116', bg2:'#003893', bg3:'#ce1126', stripe1:'rgba(255,255,255,.36)', stripe2:'rgba(206,17,38,.54)', glow:'rgba(255,255,255,.12)', line:'rgba(255,255,255,.58)', ball:'#003893'},
+  ENG:{bg1:'#ffffff', bg2:'#f7f7f7', bg3:'#ce1126', stripe1:'rgba(206,17,38,.66)', stripe2:'rgba(255,255,255,.22)', glow:'rgba(255,255,255,.18)', line:'rgba(206,17,38,.32)', ball:'#ce1126'},
+  CRO:{bg1:'#ff0000', bg2:'#ffffff', bg3:'#171796', stripe1:'rgba(255,255,255,.62)', stripe2:'rgba(23,23,150,.46)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.62)', ball:'#171796'},
+  GHA:{bg1:'#ce1126', bg2:'#fcd116', bg3:'#006b3f', stripe1:'rgba(0,0,0,.34)', stripe2:'rgba(255,255,255,.18)', glow:'rgba(255,255,255,.12)', line:'rgba(255,255,255,.56)', ball:'#006b3f'},
+  PAN:{bg1:'#ffffff', bg2:'#d21034', bg3:'#005293', stripe1:'rgba(255,255,255,.54)', stripe2:'rgba(0,82,147,.42)', glow:'rgba(255,255,255,.18)', line:'rgba(255,255,255,.60)', ball:'#005293'}
+};
+function flagOf(code){
+  if (code === 'ZERO') return '<span class="special-mark star-mark">★</span>';
+  if (code === 'FWC') return '<span class="special-mark trophy-mark">🏆</span>';
+  if (code === 'COC') return '<span class="special-mark cup-mark">🥤</span>';
+  const src = FLAGS[code];
+  if (!src) return '<span class="special-mark">⚽</span>';
+  return `<img class="flag-img" src="${src}" alt="" loading="lazy">`;
+}
+function bannerThemeStyle(code){
+  const t = BANNER_THEMES[code] || BANNER_THEMES.DEFAULT;
+  return [
+    `--banner-1:${t.bg1}`,
+    `--banner-2:${t.bg2}`,
+    `--banner-3:${t.bg3}`,
+    `--stripe-1:${t.stripe1 || 'rgba(255,64,86,.82)'}`,
+    `--stripe-2:${t.stripe2 || 'rgba(244,195,91,.75)'}`,
+    `--banner-glow:${t.glow || 'rgba(255,255,255,.18)'}`,
+    `--field-line:${t.line || 'rgba(255,255,255,.58)'}`,
+    `--banner-ball:${t.ball || t.bg1 || '#0b234a'}`
+  ].join(';');
+}
 function sectionVisual(sec){
-  const code = codeOf(sec);
-  const hostTone = sec.code === 'USA' ? 'usa' : sec.code === 'MEX' ? 'mex' : sec.code === 'CAN' ? 'can' : '';
-  return `<div class="section-visual ${hostTone}"><span class="flag-badge" aria-hidden="true">${flagOf(sec.code)}</span><span class="visual-ball">⚽</span><i></i><b></b></div>`;
+  return `<div class="section-visual" style="${bannerThemeStyle(sec.code)}"><span class="flag-badge" aria-hidden="true">${flagOf(sec.code)}</span><span class="visual-ball">⚽</span><i></i><b></b></div>`;
 }
 
 function codeOf(obj){ return obj.displayCode || obj.code; }
