@@ -1,11 +1,10 @@
-// Cole aqui as configurações do SEU projeto Firebase.
-// Firebase Console > Project settings > General > Your apps > Web app > Config.
-// Enquanto apiKey estiver vazio, o app funciona localmente sem nuvem.
+// Configuração Firebase do app Checklist Mundial
+
 window.FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyB85glvFZnQEvEahEvuXkipJDk5i0JE4o",
+  authDomain: "figurinhas-mundial.firebaseapp.com",
+  projectId: "figurinhas-mundial",
+  storageBucket: "figurinhas-mundial.firebasestorage.app",
+  messagingSenderId: "717216908103",
+  appId: "1:717216908103:web:d531a232b5259fb12f8262"
 };
