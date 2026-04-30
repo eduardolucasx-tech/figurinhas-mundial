@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.9.1-modo-familia-real';
+const THEME_VERSION = '0.9.2-sync-familia-bidirecional';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -58,6 +58,7 @@ let cloudSaveTimer = null;
 let cloud = { ready:false, auth:null, db:null, user:null, provider:null, lastSyncAt:null, loading:false };
 let familyCode = normalizeFamilyCode(localStorage.getItem(FAMILY_CODE_KEY) || '');
 let cloudUnsubscribe = null;
+let lastCloudWriteId = '';
 let undoSnapshot = null;
 let packSession = [];
 
@@ -742,14 +743,31 @@ function startCloudListener(){
   if (!doc) return;
   cloudUnsubscribe = doc.onSnapshot(snap => {
     if (!snap.exists || !snap.data().state) return;
-    const remote = normalizeState(snap.data().state);
-    const localTime = Date.parse(state.updatedAt || 0);
-    const remoteTime = Date.parse(remote.updatedAt || 0);
-    if (remoteTime > localTime) {
+    const data = snap.data();
+    const remote = normalizeState(data.state);
+
+    // Se esse snapshot é o eco da escrita deste próprio aparelho,
+    // só atualiza o status e não reprocessa o estado.
+    if (data.writeId && data.writeId === lastCloudWriteId) {
+      cloud.lastSyncAt = new Date();
+      setSync('ok', 'Sincronizado', familyCode ? `Família ${familyCode}` : 'Coleção pessoal atualizada.');
+      return;
+    }
+
+    // Em família, não usamos comparação por relógio do aparelho.
+    // Isso evita o bug de sincronizar só em uma direção quando um celular/PC
+    // está com timestamp local mais novo que o outro.
+    const before = JSON.stringify(state.quantities || {});
+    const after = JSON.stringify(remote.quantities || {});
+    const beforeTrades = JSON.stringify(state.tradeStatus || {});
+    const afterTrades = JSON.stringify(remote.tradeStatus || {});
+
+    if (before !== after || beforeTrades !== afterTrades || data.writeId) {
       state = remote;
       saveState({skipCloud:true});
       render();
     }
+
     cloud.lastSyncAt = new Date();
     setSync('ok', 'Sincronizado', familyCode ? `Família ${familyCode}` : 'Coleção pessoal atualizada.');
   }, e => {
@@ -757,6 +775,7 @@ function startCloudListener(){
     setSync('error','Erro na nuvem', e.message || 'Falha ao acompanhar coleção.');
   });
 }
+
 function queueCloudSave(){
   clearTimeout(cloudSaveTimer);
   if (!navigator.onLine) return setSync('offline','Offline','Alterações salvas localmente. Sincronize quando a internet voltar.');
@@ -778,6 +797,8 @@ async function saveCloud(showToast = true){
   if (!doc) { setSync('ready','Modo local','Entre com Google para sincronizar.'); return showToast && toast('Entre com Google para sincronizar.'); }
   try {
     setSync('syncing','Sincronizando...', familyCode ? `Salvando na família ${familyCode}.` : 'Salvando alterações na nuvem.');
+    const writeId = `${cloud.user?.uid || 'anon'}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    lastCloudWriteId = writeId;
     await doc.set({
       state,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -785,6 +806,7 @@ async function saveCloud(showToast = true){
       appVersion: window.ALBUM_DATA.version,
       mode: currentCloudMode(),
       familyCode: familyCode || null,
+      writeId,
       updatedBy: cloud.user ? { uid: cloud.user.uid, email: cloud.user.email || '' } : null
     }, {merge:true});
     cloud.lastSyncAt = new Date();
@@ -805,7 +827,9 @@ async function loadCloud(showToast = true, options = {}){
     const remote = normalizeState(snap.data().state);
     const localTime = Date.parse(state.updatedAt || 0);
     const remoteTime = Date.parse(remote.updatedAt || 0);
-    if (options.preferRemote || remoteTime > localTime) {
+    const remoteChanged = JSON.stringify(remote.quantities || {}) !== JSON.stringify(state.quantities || {})
+      || JSON.stringify(remote.tradeStatus || {}) !== JSON.stringify(state.tradeStatus || {});
+    if (options.preferRemote || familyCode || remoteTime > localTime || remoteChanged) {
       state = remote;
       saveState({skipCloud:true});
       if (showToast) toast(familyCode ? 'Coleção da família carregada.' : 'Dados carregados da nuvem.');
