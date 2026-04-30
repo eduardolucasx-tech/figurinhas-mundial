@@ -273,17 +273,23 @@ function renderDashboard(){
 function renderAlbum(){
   const groups = [...new Set(window.ALBUM_DATA.teams.map(t => t.group))];
   const s = stats();
+  const totalFigurinhas = Number(window.ALBUM_DATA.total || s.total || 995);
+  const tenhoFigurinhas = Number.isFinite(Number(s.owned)) ? Number(s.owned) : 0;
+  const faltantesFigurinhas = Number.isFinite(Number(s.missing)) ? Number(s.missing) : Math.max(0, totalFigurinhas - tenhoFigurinhas);
+  const repetidasFigurinhas = Number.isFinite(Number(s.duplicates)) ? Number(s.duplicates) : 0;
+  const acervoFisico = Number.isFinite(Number(s.physical)) ? Number(s.physical) : tenhoFigurinhas + repetidasFigurinhas;
+  const progressoAlbum = totalFigurinhas ? tenhoFigurinhas / totalFigurinhas : 0;
   $('#album').innerHTML = `
     <div class="album-hero album-hero-compact album-hero-total" aria-label="Resumo do álbum">
       <div class="album-hero-main">
         <span class="label">Meu álbum</span>
-        <h3>${s.owned}/${window.ALBUM_DATA.total} figurinhas</h3>
+        <h3>${tenhoFigurinhas}/${totalFigurinhas} figurinhas</h3>
       </div>
       <div class="album-hero-status summary-only">
-        <span>${pct(s.progress)} completo</span>
-        <span>${s.missing} faltantes</span>
-        <span>${s.duplicates} repetidas</span>
-        <span>${s.physical} no acervo físico</span>
+        <span>${pct(progressoAlbum)} completo</span>
+        <span>${faltantesFigurinhas} faltantes</span>
+        <span>${repetidasFigurinhas} repetidas</span>
+        <span>${acervoFisico} no acervo físico</span>
       </div>
     </div>
     <div class="filters album-filters">
