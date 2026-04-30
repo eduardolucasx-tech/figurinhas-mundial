@@ -22,3 +22,11 @@ Suba os arquivos na branch `main` do GitHub. A Vercel publica automaticamente.
 ## Firebase
 
 A configuração fica em `firebase-config.js`. A segurança fica nas regras do Firestore.
+
+## v0.7.1 - limpeza visual
+
+- Remove botões duplicados do topo e do card principal do Álbum.
+- Mantém apenas status de modo/sync e o botão Sincronizar agora no topo.
+- Move a instalação do app para a aba Conta.
+- Mantém os filtros do Álbum como principal forma de navegação.
+- Adiciona acesso ao Mapa como opção de visualização dentro do Álbum.

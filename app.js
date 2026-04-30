@@ -280,13 +280,10 @@ function renderAlbum(){
         <h3>${s.owned}/${s.total} figurinhas</h3>
         <p>${pct(s.progress)} completo · ${s.missing} faltantes · ${s.duplicates} repetidas · ${s.physical} no acervo físico</p>
       </div>
-      <div class="album-hero-actions">
-        <button class="primary" id="albumQuickAdd">Marcar figurinha</button>
-        <button class="ghost" id="albumAddBtn">Adicionar</button>
-        <button class="ghost" id="albumShowMissing">Faltantes</button>
-        <button class="ghost" id="albumShowDup">Repetidas</button>
-        <button class="ghost" id="albumMapBtn">Mapa</button>
-        <button class="ghost" id="albumSummaryBtn">Resumo</button>
+      <div class="album-hero-status" aria-label="Resumo do álbum">
+        <span>${pct(s.progress)} completo</span>
+        <span>${s.missing} faltantes</span>
+        <span>${s.duplicates} repetidas</span>
       </div>
     </div>
     <div class="filters album-filters">
@@ -295,12 +292,15 @@ function renderAlbum(){
       <select id="statusFilter"><option value="">Todos status</option><option value="missing">Faltantes</option><option value="owned">Tenho</option><option value="duplicate">Repetidas</option><option value="reserved">Trocas/reservas</option></select>
       <button class="ghost" id="clearFilters">Limpar</button>
     </div>
-    <div class="status-chips" aria-label="Filtros rápidos">
-      <button data-chip="" class="chip active">Todas</button>
-      <button data-chip="missing" class="chip">Faltantes</button>
-      <button data-chip="owned" class="chip">Tenho</button>
-      <button data-chip="duplicate" class="chip">Repetidas</button>
-      <button data-chip="reserved" class="chip">Trocas</button>
+    <div class="album-tools-row">
+      <div class="status-chips" aria-label="Filtros rápidos">
+        <button data-chip="" class="chip active">Todas</button>
+        <button data-chip="missing" class="chip">Faltantes</button>
+        <button data-chip="owned" class="chip">Tenho</button>
+        <button data-chip="duplicate" class="chip">Repetidas</button>
+        <button data-chip="reserved" class="chip">Trocas</button>
+      </div>
+      <button class="ghost view-toggle" id="albumMapBtn">Visualização: Mapa</button>
     </div>
     <div class="helper-card album-helper">Toque em <strong>+</strong> para adicionar e em <strong>-</strong> para remover. Clique no centro da figurinha para alternar entre 0 e 1.</div>
     <div id="teamList" class="team-list album-grid"></div>`;
@@ -309,12 +309,7 @@ function renderAlbum(){
   $('#groupFilter').addEventListener('change', sync);
   $('#statusFilter').addEventListener('change', () => { updateFilterChips(); sync(); });
   $('#clearFilters').addEventListener('click', () => { $('#searchInput').value=''; $('#groupFilter').value=''; $('#statusFilter').value=''; updateFilterChips(); sync(); });
-  $('#albumQuickAdd').addEventListener('click', openQuickAdd);
-  $('#albumAddBtn')?.addEventListener('click', () => setView('adicionar'));
-  $('#albumShowMissing').addEventListener('click', () => { $('#statusFilter').value='missing'; updateFilterChips(); sync(); });
-  $('#albumShowDup').addEventListener('click', () => { $('#statusFilter').value='duplicate'; updateFilterChips(); sync(); });
-  $('#albumMapBtn')?.addEventListener('click', () => setView('mapa'));
-  $('#albumSummaryBtn')?.addEventListener('click', () => setView('dashboard'));
+  $("#albumMapBtn")?.addEventListener("click", () => setView("mapa"));
   $$('.chip').forEach(btn => btn.addEventListener('click', () => { $('#statusFilter').value = btn.dataset.chip; updateFilterChips(); sync(); }));
   renderTeamList();
 }
@@ -430,6 +425,12 @@ function renderConfig(){
         <div class="button-row"><button class="primary" id="manualSync">Sincronizar agora</button></div>
       </div>
       <div class="card">
+        <span class="label">Aplicativo</span>
+        <h3>Instalar no celular</h3>
+        <p>Adicione o app à tela inicial para usar com mais praticidade.</p>
+        <div class="button-row"><button class="ghost" id="installBtnConfig">Instalar app</button></div>
+      </div>
+      <div class="card">
         <span class="label">Backup manual</span>
         <h3>Google Drive / segurança</h3>
         <p>Backup manual continua disponível para guardar no Drive.</p>
@@ -450,6 +451,7 @@ function renderConfig(){
   $('#exportCsv').addEventListener('click', exportCsv);
   $('#exportMissingTxt').addEventListener('click', () => download('checklist-mundial-faltantes.txt', missingText, 'text/plain;charset=utf-8'));
   $('#exportDupTxt').addEventListener('click', () => download('checklist-mundial-repetidas.txt', duplicateText, 'text/plain;charset=utf-8'));
+  $("#installBtnConfig")?.addEventListener("click", async () => { if(deferredInstallPrompt){ deferredInstallPrompt.prompt(); deferredInstallPrompt = null; toast("Instalação iniciada."); } else { toast("Use o menu do navegador para instalar/adicionar à tela inicial."); } });
   $('#importFile').addEventListener('change', importFileBackup);
   $('#importJson').addEventListener('click', importTextBackup);
   $('#resetAll').addEventListener('click', () => { if(confirm('Zerar todas as marcações?')){ state = initialState(); saveState(); render(); } });
@@ -741,13 +743,10 @@ function renderPackSession(){
 
 
 $$('.nav-item').forEach(btn => btn.addEventListener('click', () => setView(btn.dataset.view)));
-$('#quickAddBtn').addEventListener('click', openQuickAdd);
-$('#addTopBtn')?.addEventListener('click', () => setView('adicionar'));
 $("#fabQuickAdd")?.addEventListener("click", openQuickAdd);
 $('#markSearch').addEventListener('input', renderQuickResults);
 $('#syncNowBtn').addEventListener('click', syncNow);
-window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; $('#installBtn').hidden = false; });
-$('#installBtn').addEventListener('click', async () => { if(deferredInstallPrompt){ deferredInstallPrompt.prompt(); deferredInstallPrompt = null; $('#installBtn').hidden = true; } });
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredInstallPrompt = e; });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 initCloud();
 updateChrome();
