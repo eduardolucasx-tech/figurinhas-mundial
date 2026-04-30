@@ -1,5 +1,5 @@
-const STORAGE_KEY = 'checklist-mundial-state-v3';
-const LEGACY_KEYS = ['checklist-mundial-state-v2'];
+const STORAGE_KEY = 'checklist-mundial-state-v6';
+const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const AUTO_SYNC_KEY = 'checklist-mundial-auto-sync';
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -50,6 +50,7 @@ let syncUi = { status: 'local', label: 'Modo local', detail: 'Entre com Google p
 let cloudSaveTimer = null;
 let cloud = { ready:false, auth:null, db:null, user:null, provider:null, lastSyncAt:null, loading:false };
 let undoSnapshot = null;
+let packSession = [];
 
 function codeOf(obj){ return obj.displayCode || obj.code; }
 function refOf(obj, number){ return `${codeOf(obj)} ${String(number).padStart(2, '0')}`; }
@@ -197,17 +198,15 @@ function toast(message, undo = false){
 }
 
 function setView(view){
-  if (currentView === 'scanner' && view !== 'scanner') stopScanner(false);
   currentView = view;
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   $$('.view').forEach(v => v.classList.toggle('active', v.id === view));
-  $('#viewTitle').textContent = ({album:'Álbum', scanner:'Escanear figurinha', listas:'Buscar e listas', trocas:'Repetidas e trocas', mapa:'Mapa visual', dashboard:'Resumo', config:'Conta & Sincronização'})[view];
+  $('#viewTitle').textContent = ({album:'Álbum', adicionar:'Adicionar figurinhas', listas:'Buscar e listas', trocas:'Repetidas e trocas', mapa:'Mapa visual', dashboard:'Resumo', config:'Conta & Sincronização'})[view];
   render();
 }
 function render(){
   if (currentView === 'dashboard') renderDashboard();
-  if (currentView === 'scanner') renderScanner();
-
+  if (currentView === 'adicionar') renderAdicionar();
   if (currentView === 'album') renderAlbum();
   if (currentView === 'mapa') renderMap();
   if (currentView === 'listas') renderLists();
@@ -276,7 +275,7 @@ function renderAlbum(){
       </div>
       <div class="album-hero-actions">
         <button class="primary" id="albumQuickAdd">Marcar figurinha</button>
-        <button class="ghost" id="albumScanBtn">Escanear</button>
+        <button class="ghost" id="albumAddBtn">Adicionar</button>
         <button class="ghost" id="albumShowMissing">Faltantes</button>
         <button class="ghost" id="albumShowDup">Repetidas</button>
       </div>
@@ -302,7 +301,7 @@ function renderAlbum(){
   $('#statusFilter').addEventListener('change', () => { updateFilterChips(); sync(); });
   $('#clearFilters').addEventListener('click', () => { $('#searchInput').value=''; $('#groupFilter').value=''; $('#statusFilter').value=''; updateFilterChips(); sync(); });
   $('#albumQuickAdd').addEventListener('click', openQuickAdd);
-  $('#albumScanBtn')?.addEventListener('click', openScanner);
+  $('#albumAddBtn')?.addEventListener('click', () => setView('adicionar'));
   $('#albumShowMissing').addEventListener('click', () => { $('#statusFilter').value='missing'; updateFilterChips(); sync(); });
   $('#albumShowDup').addEventListener('click', () => { $('#statusFilter').value='duplicate'; updateFilterChips(); sync(); });
   $$('.chip').forEach(btn => btn.addEventListener('click', () => { $('#statusFilter').value = btn.dataset.chip; updateFilterChips(); sync(); }));
@@ -563,206 +562,161 @@ function renderQuickResults(){
 }
 function openQuickAdd(){ $('#markDialog').showModal(); $('#markSearch').value=''; renderQuickResults(); setTimeout(() => $('#markSearch').focus(), 30); }
 
-// v0.4 - Scanner de código de figurinha (processamento local, sem armazenamento de imagens)
-const SCANNER_MAX_SECONDS = 25;
-const SCANNER_MAX_MS = SCANNER_MAX_SECONDS * 1000;
-let scanner = { stream:null, timer:null, interval:null, active:false, endsAt:0, lastText:'', candidates:[], scanCount:0 };
-function renderScanner(){
-  const active = scanner.active;
-  const remaining = active ? Math.max(0, Math.ceil((scanner.endsAt - Date.now()) / 1000)) : SCANNER_MAX_SECONDS;
-  $('#scanner').innerHTML = `
-    <div class="scanner-layout scanner-layout-v05">
-      <div class="card scanner-card scanner-main-card">
-        <span class="label">Scanner mobile</span>
-        <h3>Escanear código da figurinha</h3>
-        <p>Centralize o verso da figurinha e coloque a cápsula do código no guia superior direito. A leitura dura no máximo <strong>25 segundos</strong>.</p>
-        <div class="privacy-note">🔒 Processamento local: nenhuma imagem ou vídeo é salvo, enviado para a nuvem, Firebase ou Vercel. Só o código confirmado vira dado da coleção.</div>
-        <div class="scanner-stage scanner-v05 ${active ? 'active' : 'idle'}">
-          <video id="scannerVideo" playsinline muted></video>
-          <div class="scanner-shade"></div>
-          <div class="scanner-frame" aria-hidden="true">
-            <span class="scan-corner tl"></span><span class="scan-corner tr"></span><span class="scan-corner bl"></span><span class="scan-corner br"></span>
-            <div class="sticker-guide">
-              <div class="sticker-lines side"></div>
-              <div class="sticker-symbol"></div>
-              <div class="sticker-lines bottom"></div>
-              <div class="code-guide"><span>Alinhe o código aqui</span></div>
-            </div>
-          </div>
-          <div class="scanner-tip">Centralize o verso da figurinha</div>
-          <div class="scanner-time">Leitura em até ${remaining}s</div>
+
+// v0.6 - Adicionar figurinhas manualmente: rápido, confiável e sem câmera.
+function openAdicionar(){ setView('adicionar'); }
+function normalizeCodeInput(raw){
+  return String(raw || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+}
+function findStickerCandidates(raw){
+  const text = normalizeCodeInput(raw);
+  const matches = [];
+
+  // Aceita HAI 8, HAI08, HAI-08, hai 8, Haiti 8 e buscas por seleção/status.
+  const compact = text.replace(/[^A-Z0-9]+/g,' ');
+  const noSpace = text.replace(/[^A-Z0-9]/g,'');
+  const patterns = [
+    /\b([A-Z]{3})\s*(\d{1,2})\b/g,
+    /\b([A-Z]{3})\s*-\s*(\d{1,2})\b/g,
+    /^([A-Z]{3})(\d{1,2})$/g
+  ];
+  const sources = [` ${compact} `, noSpace];
+
+  for (const source of sources) {
+    for (const re of patterns) {
+      re.lastIndex = 0;
+      let m;
+      while ((m = re.exec(source)) !== null) {
+        const code = m[1];
+        const num = Number(m[2]);
+        if (!num || num > 99) continue;
+        const found = albumItems.filter(i => (i.ref.split(' ')[0] === code || i.code === code) && i.number === num);
+        found.forEach(item => { if (!matches.some(x => x.id === item.id)) matches.push(item); });
+      }
+    }
+  }
+
+  if (matches.length) return matches.slice(0, 12);
+
+  const q = text.toLowerCase();
+  if (!q) return [];
+  return albumItems.filter(i => matchItem(i, q, '')).slice(0, 20);
+}
+function addFromAdicionar(id, delta=1){
+  const item = itemById(id);
+  if (!item) return;
+  addQuantity(id, delta);
+  if (delta > 0) {
+    packSession = [{ id, ref:item.ref, section:item.section, at:new Date().toISOString() }, ...packSession].slice(0, 30);
+  }
+  renderAdicionarResults();
+  renderPackSession();
+  const input = $('#addCodeInput');
+  if (input) { input.value=''; input.focus(); }
+}
+function renderAdicionar(){
+  $('#adicionar').innerHTML = `
+    <div class="add-page">
+      <div class="card add-hero-card">
+        <span class="label">Modo pacotinho</span>
+        <h3>Adicionar figurinhas</h3>
+        <p>Digite o código do verso da figurinha. Aceita formatos como <strong>HAI 8</strong>, <strong>HAI08</strong> ou <strong>HAI-08</strong>. Depois é só confirmar com <strong>+1</strong>.</p>
+        <div class="add-input-row">
+          <input id="addCodeInput" type="search" inputmode="text" autocomplete="off" placeholder="Digite o código: HAI 8" />
+          <button class="primary" id="addFindBtn">Buscar</button>
         </div>
-        <canvas id="scannerCanvas" hidden></canvas>
-        <div class="scanner-status" id="scannerStatus">${active ? `Escaneando... ${remaining}s` : 'Pronto para iniciar.'}</div>
+        <div class="quick-code-help">
+          <span>Exemplos rápidos:</span>
+          <button class="pill-btn" data-fill-code="BRA 10">BRA 10</button>
+          <button class="pill-btn" data-fill-code="HAI 8">HAI 8</button>
+          <button class="pill-btn" data-fill-code="MEX 3">MEX 3</button>
+        </div>
+        <div id="addResults" class="add-results"></div>
+      </div>
+
+      <div class="card pack-card">
+        <span class="label">Pacotinho atual</span>
+        <h3>Últimas adicionadas</h3>
+        <p>Use essa lista para conferir rapidamente o que você acabou de lançar.</p>
+        <div id="packSession" class="pack-session"></div>
         <div class="button-row">
-          <button class="primary" id="startScanner" ${active ? 'disabled' : ''}>Usar câmera por 25s</button>
-          <button class="ghost" id="stopScanner" ${active ? '' : 'disabled'}>Parar câmera</button>
+          <button class="ghost" id="undoPackBtn">Desfazer última ação</button>
+          <button class="ghost" id="clearPackBtn">Limpar lista</button>
         </div>
       </div>
-      <div class="scanner-side-stack">
-        <div class="card scanner-card">
-          <span class="label">Plano B rápido</span>
-          <h3>Digitar código manualmente</h3>
-          <p>Se a câmera não ler bem por reflexo ou movimento, digite o código e adicione +1.</p>
-          <div class="scanner-manual">
-            <input id="manualScanCode" placeholder="Ex: HAI 8, BRA 10" value="${escapeAttr(scanner.lastText || '')}" />
-            <button class="primary" id="manualScanBtn">Buscar</button>
-          </div>
-          <div id="scannerResult" class="scanner-results"></div>
-        </div>
-        <div class="card scanner-card scanner-guide-card">
-          <span class="label">Gabarito visual</span>
-          <h3>Como posicionar</h3>
-          <p>O código normalmente fica no canto superior direito do verso. Mantenha essa área dentro da moldura pontilhada.</p>
-          <img src="scanner-guide.png" alt="Gabarito visual para alinhar o código da figurinha no scanner" loading="lazy" />
+
+      <div class="card add-tips-card">
+        <span class="label">Dica de uso</span>
+        <h3>Mais rápido que câmera</h3>
+        <p>A câmera foi removida por enquanto. Este modo manual é mais confiável: digite o código, confirme +1 e o app sincroniza automaticamente na sua conta.</p>
+        <div class="mini-guide">
+          <div><strong>0</strong><span>Falta</span></div>
+          <div><strong>1</strong><span>Tenho</span></div>
+          <div><strong>2+</strong><span>Repetida</span></div>
         </div>
       </div>
     </div>`;
-  $('#startScanner')?.addEventListener('click', startScanner);
-  $('#stopScanner')?.addEventListener('click', () => stopScanner(true));
-  $('#manualScanBtn')?.addEventListener('click', () => showScannerCandidates($('#manualScanCode').value));
-  $('#manualScanCode')?.addEventListener('keydown', e => { if(e.key === 'Enter') showScannerCandidates(e.currentTarget.value); });
-  renderScannerCandidates();
-  if (active) attachStreamToVideo();
-}
-function openScanner(){ setView('scanner'); }
-async function startScanner(){
-  if (!navigator.mediaDevices?.getUserMedia) return toast('Câmera não disponível neste navegador.');
-  if (!window.Tesseract) return toast('Leitor OCR não carregou. Use a digitação manual.');
-  try {
-    scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio:false });
-    scanner.active = true;
-    scanner.endsAt = Date.now() + SCANNER_MAX_MS;
-    scanner.candidates = [];
-    scanner.scanCount = 0;
-    renderScanner();
-    attachStreamToVideo();
-    scanner.timer = setTimeout(() => finishScannerTimeout(), SCANNER_MAX_MS);
-    scanner.interval = setInterval(scanFrameOnce, 2000);
-    setTimeout(scanFrameOnce, 1600);
-  } catch(e){
-    console.warn(e);
-    toast('Não consegui acessar a câmera.');
-    setScannerStatus('Permissão negada ou câmera indisponível. Use a digitação manual.');
-  }
-}
-function attachStreamToVideo(){
-  const video = $('#scannerVideo');
-  if (video && scanner.stream) { video.srcObject = scanner.stream; video.play().catch(()=>{}); }
-}
-function stopScanner(showToast = false){
-  scanner.active = false;
-  clearTimeout(scanner.timer); clearInterval(scanner.interval);
-  scanner.timer = null; scanner.interval = null;
-  if (scanner.stream) scanner.stream.getTracks().forEach(t => t.stop());
-  scanner.stream = null;
-  if (showToast) toast('Câmera desligada.');
-  if (currentView === 'scanner') renderScanner();
-}
-function finishScannerTimeout(){
-  stopScanner(false);
-  setTimeout(() => {
-    if (currentView === 'scanner') {
-      renderScanner();
-      setScannerStatus('Tempo de 25s encerrado. Nenhuma imagem foi salva. Tente novamente ou digite o código.');
+  $('#addFindBtn')?.addEventListener('click', renderAdicionarResults);
+  $('#addCodeInput')?.addEventListener('input', renderAdicionarResults);
+  $('#addCodeInput')?.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      e.preventDefault();
+      const candidates = findStickerCandidates(e.currentTarget.value);
+      if (candidates.length === 1) addFromAdicionar(candidates[0].id, 1);
+      else renderAdicionarResults();
     }
-  }, 30);
+  });
+  $$('[data-fill-code]').forEach(b => b.addEventListener('click', () => { $('#addCodeInput').value = b.dataset.fillCode; renderAdicionarResults(); $('#addCodeInput').focus(); }));
+  $('#undoPackBtn')?.addEventListener('click', undoLast);
+  $('#clearPackBtn')?.addEventListener('click', () => { packSession = []; renderPackSession(); toast('Lista do pacotinho limpa.'); });
+  renderAdicionarResults();
+  renderPackSession();
+  setTimeout(() => $('#addCodeInput')?.focus(), 30);
 }
-function setScannerStatus(msg){ const el = $('#scannerStatus'); if (el) el.textContent = msg; }
-async function scanFrameOnce(){
-  if (!scanner.active || scanner.recognizing) return;
-  const video = $('#scannerVideo'); const canvas = $('#scannerCanvas');
-  if (!video || !canvas || !video.videoWidth) return;
-  scanner.recognizing = true;
-  scanner.scanCount = (scanner.scanCount || 0) + 1;
-  try {
-    const w = Math.min(960, video.videoWidth); const h = Math.round(video.videoHeight * (w / video.videoWidth));
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d', { willReadFrequently:true });
-    ctx.drawImage(video, 0, 0, w, h);
-    setScannerStatus('Lendo a área do código localmente...');
-
-    // Primeiro tenta ler só onde o código costuma ficar: canto superior direito do verso.
-    const roi = document.createElement('canvas');
-    const rw = Math.round(w * 0.38), rh = Math.round(h * 0.20);
-    const rx = Math.round(w * 0.50), ry = Math.round(h * 0.21);
-    roi.width = rw; roi.height = rh;
-    const rctx = roi.getContext('2d', { willReadFrequently:true });
-    rctx.drawImage(canvas, rx, ry, rw, rh, 0, 0, rw, rh);
-    rctx.filter = 'contrast(150%) grayscale(100%)';
-    rctx.drawImage(roi, 0, 0);
-
-    let result = await Tesseract.recognize(roi, 'eng');
-    let text = result?.data?.text || '';
-    let candidates = findStickerCandidates(text);
-
-    // Fallback no quadro completo a cada duas tentativas.
-    if (!candidates.length && scanner.scanCount % 2 === 0) {
-      setScannerStatus('Tentando no quadro completo...');
-      result = await Tesseract.recognize(canvas, 'eng');
-      text += ' ' + (result?.data?.text || '');
-      candidates = findStickerCandidates(text);
-    }
-
-    scanner.lastText = text.trim().slice(0, 160);
-    if (candidates.length) {
-      scanner.candidates = candidates;
-      stopScanner(false);
-      renderScanner();
-      setScannerStatus('Código encontrado. Confirme antes de adicionar.');
-      toast('Código detectado. Confirme a figurinha.');
-    } else if (scanner.active) {
-      const remaining = Math.max(0, Math.ceil((scanner.endsAt - Date.now()) / 1000));
-      setScannerStatus(`Ainda não encontrei. Alinhe o código no canto superior direito... ${remaining}s`);
-    }
-  } catch(e){
-    console.warn(e);
-    setScannerStatus('OCR falhou nesta tentativa. Tente aproximar ou digite manualmente.');
-  } finally { scanner.recognizing = false; }
-}
-function showScannerCandidates(raw){
-  scanner.lastText = raw || '';
-  scanner.candidates = findStickerCandidates(raw || '');
-  renderScannerCandidates();
-  setScannerStatus(scanner.candidates.length ? 'Código encontrado. Confirme antes de adicionar.' : 'Não encontrei esse código na base. Confira o formato, ex: BRA 10.');
-}
-function findStickerCandidates(raw){
-  const text = String(raw || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
-  const compact = text.replace(/[^A-Z0-9]+/g,' ');
-  const matches = [];
-  const source = ` ${compact} `;
-  const patterns = [/\b([A-Z]{3})\s*(\d{1,2})\b/g, /\b([A-Z]{3})\s*-\s*(\d{1,2})\b/g];
-  for (const re of patterns) {
-    let m;
-    while ((m = re.exec(source)) !== null) {
-      const code = m[1]; const num = Number(m[2]);
-      if (!num || num > 99) continue;
-      const found = albumItems.filter(i => (i.ref.split(' ')[0] === code || i.code === code) && i.number === num);
-      found.forEach(item => { if (!matches.some(x => x.id === item.id)) matches.push(item); });
-    }
-  }
-  return matches.slice(0, 8);
-}
-function renderScannerCandidates(){
-  const box = $('#scannerResult');
+function renderAdicionarResults(){
+  const box = $('#addResults');
   if (!box) return;
-  if (!scanner.candidates.length) {
-    box.innerHTML = `<div class="empty scanner-empty">Nenhuma figurinha detectada ainda.</div>`;
+  const raw = $('#addCodeInput')?.value || '';
+  const candidates = findStickerCandidates(raw);
+  if (!raw.trim()) {
+    box.innerHTML = `<div class="empty add-empty">Digite um código para começar. Exemplo: <strong>HAI 8</strong>.</div>`;
     return;
   }
-  box.innerHTML = scanner.candidates.map(i => `
-    <div class="result-item ${statusClass(i)}">
-      <div><strong>${i.ref}</strong><br><span class="muted">${i.section} · qtd atual ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span></div>
-      <div class="button-row scanner-choice-actions"><button class="primary" data-scan-add="${i.id}">Adicionar +1</button><button class="ghost" data-scan-open="${i.id}">Zerar/alternar</button></div>
-    </div>`).join('') + (scanner.candidates.length > 1 ? `<p class="muted">Mais de uma opção encontrada. Escolha a correta antes de adicionar.</p>` : '');
-  $$('[data-scan-add]', box).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.scanAdd, 1); scanner.candidates = []; renderScannerCandidates(); }));
-  $$('[data-scan-open]', box).forEach(b => b.addEventListener('click', () => { quickToggle(b.dataset.scanOpen); renderScannerCandidates(); }));
+  if (!candidates.length) {
+    box.innerHTML = `<div class="empty add-empty">Não encontrei esse código. Confira se está no formato <strong>3 letras + número</strong>, tipo HAI 8.</div>`;
+    return;
+  }
+  box.innerHTML = candidates.map(i => `
+    <div class="result-item add-result ${statusClass(i)}">
+      <div>
+        <strong>${i.ref}</strong><br>
+        <span class="muted">${i.section} · ${statusLabel(i)} · qtd ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span>
+      </div>
+      <div class="qty-inline">
+        <button type="button" data-add-dec="${i.id}">−</button>
+        <b>${quantity(i.id)}</b>
+        <button type="button" data-add-inc="${i.id}">+1</button>
+        <button type="button" class="pill-btn" data-add-zero="${i.id}">Zerar</button>
+      </div>
+    </div>`).join('') + (candidates.length > 1 ? `<p class="muted">Mais de uma opção encontrada. Escolha a correta antes de adicionar.</p>` : '');
+  $$('[data-add-inc]', box).forEach(b => b.addEventListener('click', () => addFromAdicionar(b.dataset.addInc, 1)));
+  $$('[data-add-dec]', box).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.addDec, -1); renderAdicionarResults(); }));
+  $$('[data-add-zero]', box).forEach(b => b.addEventListener('click', () => { setQuantity(b.dataset.addZero, 0, `${itemById(b.dataset.addZero).ref} zerada`); renderAdicionarResults(); }));
+}
+function renderPackSession(){
+  const box = $('#packSession');
+  if (!box) return;
+  if (!packSession.length) {
+    box.innerHTML = `<div class="empty add-empty">Nada lançado neste pacotinho ainda.</div>`;
+    return;
+  }
+  box.innerHTML = packSession.map(p => `<div class="pack-row"><strong>${p.ref}</strong><span>${p.section}</span><em>+1</em></div>`).join('');
 }
 
 
 $$('.nav-item').forEach(btn => btn.addEventListener('click', () => setView(btn.dataset.view)));
 $('#quickAddBtn').addEventListener('click', openQuickAdd);
-$('#scanTopBtn')?.addEventListener('click', openScanner);
+$('#addTopBtn')?.addEventListener('click', () => setView('adicionar'));
 $("#fabQuickAdd")?.addEventListener("click", openQuickAdd);
 $('#markSearch').addEventListener('input', renderQuickResults);
 $('#syncNowBtn').addEventListener('click', syncNow);
