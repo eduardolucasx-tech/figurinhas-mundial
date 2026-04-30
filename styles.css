@@ -438,3 +438,115 @@ button,.ghost,.primary,.hero-btn,.nav-item,.team-card,.sticker,.pill-btn,.filter
   .premium-team .team-head h3{font-size:19px}
   .complete-ribbon{padding:7px 10px;font-size:11px}
 }
+
+
+/* v0.8.8 — Conta simplificada, nuvem como fluxo principal */
+.account-simple{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:18px;
+  align-items:stretch;
+}
+.account-hero-card{
+  grid-row:span 2;
+  min-height:330px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(103,200,255,.16), transparent 28%),
+    radial-gradient(circle at 12% 100%, rgba(16,168,111,.12), transparent 34%),
+    rgba(255,250,240,.90);
+}
+.account-hero-card h3,
+.sync-simple-card h3,
+.install-simple-card h3,
+.danger-simple-card h3{
+  margin:18px 0 10px;
+  font-size:clamp(24px,2.2vw,34px);
+  letter-spacing:-.045em;
+  color:#08162d;
+}
+.account-hero-card p,
+.sync-simple-card p,
+.install-simple-card p,
+.danger-simple-card p{
+  max-width:680px;
+  color:#293648;
+}
+.account-status-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:18px 0 8px;
+}
+.account-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 13px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid rgba(5,23,52,.08);
+  font-weight:900;
+  color:#263044;
+  box-shadow:0 8px 18px rgba(5,23,52,.06);
+}
+.account-pill.ok{
+  background:#e4fff1;
+  color:#0f6b42;
+}
+.account-pill.local{
+  background:#fff7dd;
+  color:#715100;
+}
+.account-actions{
+  margin-top:24px;
+}
+.sync-last{
+  display:grid;
+  gap:3px;
+  margin:14px 0;
+  padding:12px 14px;
+  border-radius:16px;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(5,23,52,.06);
+}
+.sync-last small{
+  color:var(--muted);
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.sync-last strong{
+  color:#0d1831;
+}
+.install-simple-card,
+.danger-simple-card{
+  min-height:190px;
+}
+.danger-simple-card{
+  background:rgba(255,247,247,.82);
+}
+@media (max-width:900px){
+  .account-simple{
+    grid-template-columns:1fr;
+  }
+  .account-hero-card{
+    grid-row:auto;
+    min-height:0;
+  }
+}
+
+
+/* v0.8.9 — remove dados atuais/horários da Conta */
+.sync-simple-card .check-line{
+  margin-top:18px;
+}
+.sync-simple-card .button-row{
+  margin-top:22px;
+}
+
+
+/* v0.9.0 — remove dica de uso da tela Adicionar */
+.add-tips-card,
+.add-helper{
+  display:none !important;
+}

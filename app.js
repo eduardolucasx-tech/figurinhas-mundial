@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.8.7-premium-elite-finish';
+const THEME_VERSION = '0.9.0-sem-dica-adicionar';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const AUTO_SYNC_KEY = 'checklist-mundial-auto-sync';
@@ -550,60 +550,81 @@ function renderTrades(){
 }
 
 function renderConfig(){
-  const exportPayload = JSON.stringify(state, null, 2);
-  const missingText = formatList(i => quantity(i.id) === 0);
-  const duplicateText = formatList(i => quantity(i.id) > 1, 'dup');
-  const cloudStatus = cloud.user ? `Conectado como ${cloud.user.email || cloud.user.displayName || 'Google'}` : (cloud.ready ? 'Nuvem pronta. Entre com Google para sincronizar.' : 'Nuvem não configurada. O app continua local.');
+  const logged = !!cloud.user;
+  const email = cloud.user?.email || '';
   $('#config').innerHTML = `
-    <div class="config-grid">
-      <div class="card account-card">
-        <span class="label">Conta</span>
-        <h3>${cloud.user ? 'Conta conectada' : 'Entrar para sincronizar'}</h3>
-        <p>${cloudStatus}</p>
-        <div class="button-row"><button class="primary" id="googleLogin">Entrar com Google</button><button class="ghost" id="googleLogout">Sair</button></div>
-      </div>
-      <div class="card">
-        <span class="label">Sincronização automática</span>
-        <h3>${autoSync ? 'Ativada' : 'Desativada'}</h3>
-        <p>${syncUi.detail || 'Ao marcar figurinhas, o app salva localmente e sincroniza com a nuvem automaticamente.'}</p>
-        <label class="check-line"><input id="autoSyncToggle" type="checkbox" ${autoSync ? 'checked' : ''}> Sincronizar automaticamente</label>
-        <div class="button-row"><button class="primary" id="manualSync">Sincronizar agora</button></div>
-      </div>
-      <div class="card">
+    <div class="account-simple">
+      <section class="card account-hero-card">
+        <span class="label">Conta e nuvem</span>
+        <h3>${logged ? 'Tudo sincronizado' : 'Entre para sincronizar'}</h3>
+        <p>${logged ? `Google conectado em <strong>${email}</strong>. Suas figurinhas ficam salvas na nuvem e disponíveis no celular e no computador.` : 'Entre com Google para salvar sua coleção na nuvem e usar em qualquer aparelho.'}</p>
+        <div class="account-status-row">
+          <span class="account-pill ${logged ? 'ok' : 'local'}">${logged ? 'Google conectado' : 'Modo local'}</span>
+          <span class="account-pill">${autoSync ? 'Sync automático ativo' : 'Sync automático pausado'}</span>
+        </div>
+        <div class="button-row account-actions">
+          <button class="primary" id="googleLogin">${logged ? 'Trocar conta Google' : 'Entrar com Google'}</button>
+          <button class="ghost" id="googleLogout">Sair</button>
+        </div>
+      </section>
+
+      <section class="card sync-simple-card">
+        <span class="label">Sincronização</span>
+        <h3>Automática por padrão</h3>
+        <p>Quando você marcar figurinhas, o app salva localmente e envia para a nuvem automaticamente.</p>
+        <label class="check-line">
+          <input type="checkbox" id="autoSyncToggle" ${autoSync ? 'checked' : ''}>
+          Sincronizar automaticamente
+        </label>
+        <div class="button-row">
+          <button class="primary" id="manualSync">Sincronizar agora</button>
+        </div>
+      </section>
+
+      <section class="card install-simple-card">
         <span class="label">Aplicativo</span>
         <h3>Instalar no celular</h3>
-        <p>Adicione o app à tela inicial para usar com mais praticidade.</p>
-        <div class="button-row"><button class="ghost" id="installBtnConfig">Instalar app</button></div>
-      </div>
-      <div class="card">
-        <span class="label">Backup manual</span>
-        <h3>Google Drive / segurança</h3>
-        <p>Backup manual continua disponível para guardar no Drive.</p>
-        <div class="button-row"><button class="primary" id="exportJson">Baixar backup JSON</button><button class="ghost" id="exportCsv">Baixar CSV</button></div>
-        <div class="button-row"><button class="ghost" id="exportMissingTxt">Baixar faltantes TXT</button><button class="ghost" id="exportDupTxt">Baixar repetidas TXT</button></div>
-        <input id="importFile" type="file" accept="application/json,.json" />
-        <textarea id="importText" placeholder="Ou cole um backup JSON aqui"></textarea>
-        <div class="button-row"><button class="primary" id="importJson">Importar backup</button><button class="danger" id="resetAll">Zerar tudo</button></div>
-      </div>
-      <div class="card">
-        <span class="label">Dados atuais</span>
-        <p>Última alteração local: ${new Date(state.updatedAt).toLocaleString('pt-BR')}</p>
-        <p>Última sincronização: ${cloud.lastSyncAt ? cloud.lastSyncAt.toLocaleString('pt-BR') : 'ainda não sincronizado'}</p>
-        <textarea readonly>${exportPayload}</textarea>
-      </div>
+        <p>Adicione o app à tela inicial para abrir mais rápido, como um aplicativo normal.</p>
+        <div class="button-row">
+          <button class="ghost" id="installBtnConfig">Instalar app</button>
+        </div>
+      </section>
+
+      <section class="card danger-simple-card">
+        <span class="label">Manutenção</span>
+        <h3>Zerar coleção</h3>
+        <p>Use só se quiser apagar tudo deste aparelho e começar do zero.</p>
+        <div class="button-row">
+          <button class="danger" id="resetAll">Zerar tudo</button>
+        </div>
+      </section>
     </div>`;
-  $('#exportJson').addEventListener('click', () => download('checklist-mundial-backup.json', JSON.stringify(state, null, 2), 'application/json'));
-  $('#exportCsv').addEventListener('click', exportCsv);
-  $('#exportMissingTxt').addEventListener('click', () => download('checklist-mundial-faltantes.txt', missingText, 'text/plain;charset=utf-8'));
-  $('#exportDupTxt').addEventListener('click', () => download('checklist-mundial-repetidas.txt', duplicateText, 'text/plain;charset=utf-8'));
-  $("#installBtnConfig")?.addEventListener("click", async () => { if(deferredInstallPrompt){ deferredInstallPrompt.prompt(); deferredInstallPrompt = null; toast("Instalação iniciada."); } else { toast("Use o menu do navegador para instalar/adicionar à tela inicial."); } });
-  $('#importFile').addEventListener('change', importFileBackup);
-  $('#importJson').addEventListener('click', importTextBackup);
-  $('#resetAll').addEventListener('click', () => { if(confirm('Zerar todas as marcações?')){ state = initialState(); saveState(); render(); } });
+
+  $('#installBtnConfig')?.addEventListener('click', async () => {
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt = null;
+      toast("Instalação iniciada.");
+    } else {
+      toast("Use o menu do navegador para instalar/adicionar à tela inicial.");
+    }
+  });
   $('#googleLogin').addEventListener('click', signInCloud);
   $('#googleLogout').addEventListener('click', signOutCloud);
   $('#manualSync').addEventListener('click', syncNow);
-  $('#autoSyncToggle').addEventListener('change', (e) => { autoSync = e.target.checked; localStorage.setItem(AUTO_SYNC_KEY, autoSync ? '1' : '0'); toast(autoSync ? 'Sincronização automática ligada.' : 'Sincronização automática desligada.'); renderConfig(); });
+  $('#autoSyncToggle').addEventListener('change', e => {
+    autoSync = e.target.checked;
+    localStorage.setItem(AUTO_SYNC_KEY, autoSync ? '1' : '0');
+    toast(autoSync ? 'Sincronização automática ativada.' : 'Sincronização automática pausada.');
+    renderConfig();
+  });
+  $('#resetAll').addEventListener('click', () => {
+    if(confirm('Zerar todas as marcações?')){
+      state = initialState();
+      saveState();
+      render();
+    }
+  });
 }
 
 function importTextBackup(){
@@ -819,13 +840,6 @@ function renderAdicionar(){
           <button class="ghost" id="clearPackBtn">Limpar lista</button>
         </div>
       </div>
-
-      <div class="card add-tips-card">
-        <span class="label">Dica de uso</span>
-        <h3>Mais rápido que câmera</h3>
-        <p>A câmera foi removida por enquanto. Este modo manual é mais confiável: digite o código, confirme +1 e o app sincroniza automaticamente na sua conta.</p>
-        <div class="mini-guide">
-          <div><strong>0</strong><span>Falta</span></div>
           <div><strong>1</strong><span>Tenho</span></div>
           <div><strong>2+</strong><span>Repetida</span></div>
         </div>
