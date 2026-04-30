@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.8.4-premium-copa-flags-inline';
+const THEME_VERSION = '0.8.7-premium-elite-finish';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const AUTO_SYNC_KEY = 'checklist-mundial-auto-sync';
@@ -88,7 +88,7 @@ const FLAGS = {
   "JPN": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0Ij48cmVjdCB3aWR0aD0iMzYiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PHJlY3Qgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMTgiIGN5PSIxMiIgcj0iNiIgZmlsbD0iI2JjMDAyZCIvPjwvc3ZnPg==",
   "KOR": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0Ij48cmVjdCB3aWR0aD0iMzYiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PHJlY3Qgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMTgiIGN5PSIxMiIgcj0iNiIgZmlsbD0iI2NkMmUzYSIvPjxwYXRoIGQ9Ik0xMiAxMmE2IDYgMCAwIDAgMTIgMGEzIDMgMCAwIDEtNiAwYTMgMyAwIDAgMC02IDB6IiBmaWxsPSIjMDA0N2EwIi8+PGcgc3Ryb2tlPSIjMTExIiBzdHJva2Utd2lkdGg9IjEiPjxwYXRoIGQ9Ik02IDVoNk02IDdoNk02IDloNk0yNCAxNWg2TTI0IDE3aDZNMjQgMTloNiIvPjwvZz48L3N2Zz4=",
   "KSA": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0Ij48cmVjdCB3aWR0aD0iMzYiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PHJlY3Qgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiBmaWxsPSIjMDA2YzM1Ii8+PHJlY3QgeD0iOCIgeT0iMTEiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyIiBmaWxsPSIjZmZmIi8+PHJlY3QgeD0iMTIiIHk9IjE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMS41IiBmaWxsPSIjZmZmIi8+PC9zdmc+",
-  "MAR": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0Ij48cmVjdCB3aWR0aD0iMzYiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PHJlY3Qgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiBmaWxsPSIjYzEyNzJkIi8+PHBvbHlnb24gcG9pbnRzPSIxOCw3IDIxLDE2IDEzLDEwLjc1IDIzLDEwLjc1IDE1LDE2IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDYyMzMiIHN0cm9rZS13aWR0aD0iMS41IiBmaWxsPSJub25lIi8+PC9zdmc+",
+  "MAR": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0Ij48cmVjdCB3aWR0aD0iMzYiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjYzEyNzJkIi8+PHBhdGggZD0iTTE4IDYuNmwyLjIgNi41aDYuOWwtNS42IDQgMi4yIDYuMy01LjctNC4xLTUuNyA0LjEgMi4yLTYuMy01LjYtNGg2Ljl6IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDYyMzMiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+",
   "MEX": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0Ij48cmVjdCB3aWR0aD0iMzYiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjI0IiBmaWxsPSIjMDA2ODQ3Ii8+PHJlY3QgeD0iMTIiIHk9IjAiIHdpZHRoPSIxMiIgaGVpZ2h0PSIyNCIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjI0IiB5PSIwIiB3aWR0aD0iMTIiIGhlaWdodD0iMjQiIGZpbGw9IiNjZTExMjYiLz48Y2lyY2xlIGN4PSIxOCIgY3k9IjEyIiByPSIyLjQiIGZpbGw9IiNjOWEyMjciLz48L3N2Zz4=",
   "NED": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0Ij48cmVjdCB3aWR0aD0iMzYiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjgiIGZpbGw9IiNhZTFjMjgiLz48cmVjdCB4PSIwIiB5PSI4IiB3aWR0aD0iMzYiIGhlaWdodD0iOCIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjAiIHk9IjE2IiB3aWR0aD0iMzYiIGhlaWdodD0iOCIgZmlsbD0iIzIxNDY4YiIvPjwvc3ZnPg==",
   "NOR": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAyNCIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0Ij48cmVjdCB3aWR0aD0iMzYiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PHJlY3Qgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiBmaWxsPSIjYmEwYzJmIi8+PHJlY3QgeD0iMCIgeT0iOSIgd2lkdGg9IjM2IiBoZWlnaHQ9IjYiIGZpbGw9IiNmZmYiLz48cmVjdCB4PSIxNSIgeT0iMCIgd2lkdGg9IjYiIGhlaWdodD0iMjQiIGZpbGw9IiNmZmYiLz48cmVjdCB4PSIwIiB5PSIxMC41IiB3aWR0aD0iMzYiIGhlaWdodD0iMyIgZmlsbD0iIzAwMjA1YiIvPjxyZWN0IHg9IjE2LjUiIHk9IjAiIHdpZHRoPSIzIiBoZWlnaHQ9IjI0IiBmaWxsPSIjMDAyMDViIi8+PC9zdmc+",
@@ -492,12 +492,12 @@ function stickerButton(item){
   const st = statusLabel(item);
   return `<div class="sticker ${statusClass(item)}" title="${item.ref} · ${st}">
     <button class="sticker-main" data-open="${item.id}"><strong>${item.ref}</strong><span>${q > 1 ? `x${q} · +${q-1}` : st}</span></button>
-    <div class="qty-row"><button data-dec="${item.id}" aria-label="Remover">−</button><b>${q}</b><button data-inc="${item.id}" aria-label="Adicionar">+</button></div>
+    <div class="qty-row"><button class="qty-btn dec" data-dec="${item.id}" aria-label="Remover">−</button><b>${q}</b><button class="qty-btn inc" data-inc="${item.id}" aria-label="Adicionar">+</button></div>
   </div>`;
 }
 function bindQuantityControls(ctx=document){
-  $$('[data-inc]', ctx).forEach(b => b.addEventListener('click', () => addQuantity(b.dataset.inc, 1)));
-  $$('[data-dec]', ctx).forEach(b => b.addEventListener('click', () => addQuantity(b.dataset.dec, -1)));
+  $$('[data-inc]', ctx).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.inc, 1); animateQtyButton(b); }));
+  $$('[data-dec]', ctx).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.dec, -1); animateQtyButton(b); }));
   $$('[data-open]', ctx).forEach(b => b.addEventListener('click', () => quickToggle(b.dataset.open)));
 }
 
@@ -714,8 +714,10 @@ window.addEventListener('offline', () => setSync('offline','Offline','Alteraçõ
 function renderQuickResults(){
   const q = $('#markSearch').value.trim().toLowerCase();
   const results = albumItems.filter(i => matchItem(i, q, '')).slice(0, 100);
-  $('#markResults').innerHTML = results.map(i => `<div class="result-item ${statusClass(i)}"><div><strong>${i.ref}</strong><br><span class="muted">${i.section} · ${statusLabel(i)} · qtd ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span></div><div class="qty-inline"><button type="button" data-dec="${i.id}">−</button><b>${quantity(i.id)}</b><button type="button" data-inc="${i.id}">+</button><button type="button" class="pill-btn" data-zero="${i.id}">Zerar</button></div></div>`).join('');
+  $('#markResults').innerHTML = results.map(i => `<div class="result-item ${statusClass(i)}"><div><strong>${i.ref}</strong><br><span class="muted">${i.section} · ${statusLabel(i)} · qtd ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span></div><div class="qty-inline"><button type="button" class="qty-btn dec" data-dec="${i.id}">−</button><b>${quantity(i.id)}</b><button type="button" class="qty-btn inc" data-inc="${i.id}">+</button><button type="button" class="pill-btn" data-zero="${i.id}">Zerar</button></div></div>`).join('');
   bindQuantityControls($('#markResults'));
+  $$('[data-inc]', $('#markResults')).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.inc, 1); animateQtyButton(b); renderQuickResults(); }));
+  $$('[data-dec]', $('#markResults')).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.dec, -1); animateQtyButton(b); renderQuickResults(); }));
   $$('[data-zero]', $('#markResults')).forEach(b => b.addEventListener('click', () => { setQuantity(b.dataset.zero, 0, `${itemById(b.dataset.zero).ref} zerada`); renderQuickResults(); }));
 }
 function openQuickAdd(){ $('#markDialog').showModal(); $('#markSearch').value=''; renderQuickResults(); setTimeout(() => $('#markSearch').focus(), 30); }
@@ -866,14 +868,14 @@ function renderAdicionarResults(){
         <span class="muted">${i.section} · ${statusLabel(i)} · qtd ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span>
       </div>
       <div class="qty-inline">
-        <button type="button" data-add-dec="${i.id}">−</button>
+        <button type="button" class="qty-btn dec" data-add-dec="${i.id}">−</button>
         <b>${quantity(i.id)}</b>
-        <button type="button" data-add-inc="${i.id}">+1</button>
+        <button type="button" class="qty-btn inc" data-add-inc="${i.id}">+1</button>
         <button type="button" class="pill-btn" data-add-zero="${i.id}">Zerar</button>
       </div>
     </div>`).join('') + (candidates.length > 1 ? `<p class="muted">Mais de uma opção encontrada. Escolha a correta antes de adicionar.</p>` : '');
-  $$('[data-add-inc]', box).forEach(b => b.addEventListener('click', () => addFromAdicionar(b.dataset.addInc, 1)));
-  $$('[data-add-dec]', box).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.addDec, -1); renderAdicionarResults(); }));
+  $$('[data-add-inc]', box).forEach(b => b.addEventListener('click', () => { addFromAdicionar(b.dataset.addInc, 1); animateQtyButton(b); }));
+  $$('[data-add-dec]', box).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.addDec, -1); animateQtyButton(b); renderAdicionarResults(); }));
   $$('[data-add-zero]', box).forEach(b => b.addEventListener('click', () => { setQuantity(b.dataset.addZero, 0, `${itemById(b.dataset.addZero).ref} zerada`); renderAdicionarResults(); }));
 }
 function renderPackSession(){
@@ -895,4 +897,12 @@ window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); defe
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 initCloud();
 updateChrome();
-renderAlbum();
+renderAlbum();function animateQtyButton(btn){
+  if(!btn) return;
+  btn.classList.remove('press-pop');
+  void btn.offsetWidth;
+  btn.classList.add('press-pop');
+  btn.addEventListener('animationend', () => btn.classList.remove('press-pop'), { once:true });
+}
+
+

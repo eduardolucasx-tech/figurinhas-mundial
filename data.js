@@ -1,6 +1,6 @@
 window.ALBUM_DATA = {
   appName: 'Checklist Mundial',
-  version: '0.8.4-premium-copa-flags-inline',
+  version: '0.8.7-premium-elite-finish',
   total: 994,
   // Ordem de layout ajustada: seleções na ordem do álbum e, ao final, 00 + FWC 01–19 antes da Coca-Cola.
   teams: [
