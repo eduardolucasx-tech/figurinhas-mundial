@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f7a4f" />
+  <title>Checklist Mundial</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">CM</div>
+        <div>
+          <h1>Checklist Mundial</h1>
+          <p>controle de cromos</p>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navegação principal">
+        <button class="nav-item active" data-view="dashboard">Dashboard</button>
+        <button class="nav-item" data-view="album">Álbum</button>
+        <button class="nav-item" data-view="mapa">Mapa visual</button>
+        <button class="nav-item" data-view="listas">Listas</button>
+        <button class="nav-item" data-view="trocas">Trocas</button>
+        <button class="nav-item" data-view="config">Backup & Nuvem</button>
+      </nav>
+      <div class="side-card">
+        <span class="label">Progresso</span>
+        <strong id="sideProgress">0%</strong>
+        <div class="mini-bar"><span id="sideProgressBar"></span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Álbum de seleções 2026</p>
+          <h2 id="viewTitle">Dashboard</h2>
+        </div>
+        <div class="top-actions">
+          <button class="ghost" id="installBtn" hidden>Instalar app</button>
+          <button class="ghost" id="syncNowBtn" title="Sincronizar com a nuvem" hidden>Sincronizar</button>
+          <button class="primary" id="quickAddBtn">Marcar cromo</button>
+        </div>
+      </header>
+
+      <section id="dashboard" class="view active"></section>
+      <section id="album" class="view"></section>
+      <section id="mapa" class="view"></section>
+      <section id="listas" class="view"></section>
+      <section id="trocas" class="view"></section>
+      <section id="config" class="view"></section>
+    </main>
+  </div>
+
+  <dialog id="markDialog">
+    <form method="dialog" class="dialog-card" id="markForm">
+      <div class="dialog-head">
+        <h3>Marcar cromo</h3>
+        <button class="icon-btn" value="cancel" aria-label="Fechar">×</button>
+      </div>
+      <label>Buscar por código, seleção ou nome
+        <input id="markSearch" type="search" placeholder="Ex: BRA 10, Argentina, FWC 12" />
+      </label>
+      <div id="markResults" class="mark-results"></div>
+      <menu>
+        <button class="ghost" value="cancel">Fechar</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="data.js"></script>
+  <!-- Firebase opcional: preencha firebase-config.js para ativar login Google + nuvem. -->
+  <script src="firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
