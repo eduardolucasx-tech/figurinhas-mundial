@@ -1,7 +1,13 @@
-const CACHE='meu-album-copa-v0112-sticker-layout-reset';
+const CACHE='meu-album-copa-v0114-stable-clean';
 const FILES=['./','./index.html','./styles.css','./app.js','./data.js','./firebase-config.js','./manifest.webmanifest','./icon.svg'];
-self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));});
-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('install',event=>{
+  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE).then(cache=>Promise.allSettled(FILES.map(file=>cache.add(file)))));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+  self.clients.claim();
+});
 self.addEventListener('fetch',event=>{
   if(event.request.method !== 'GET') return;
   event.respondWith(fetch(event.request).then(response=>{

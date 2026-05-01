@@ -32,3 +32,10 @@ Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel public
 - Corrigida a deformação das figurinhas repetidas: repetida, faltante, tenho, prata e dourada usam a mesma estrutura.
 - Centralização dos textos internos da figurinha reforçada.
 - Banner das seleções ajustado para evitar nome desalinhado e sobreposição com as informações.
+
+## v0.11.4 stable-clean
+- Mantém a base real da v0.11.2, sem reconstruir/zerar dados.
+- Atualiza cache do service worker para forçar publicação limpa na Vercel/PWA.
+- Remove dependências React não usadas no package.json.
+- Remove logs de debug do app.js, preservando mensagens de erro na interface.
+- Mantém total oficial de 994 figurinhas, Firebase/sync, modo família, listas, trocas, mapa e adicionar figurinhas.
