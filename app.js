@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.11.2-desktop-banner-sticker-align';
+const THEME_VERSION = '0.11.3-banner-balance-sticker-center';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -205,7 +205,7 @@ function teamBanner(sec, st){
         <strong class="team-banner-count">${st.owned}/${st.total}</strong>
       </div>
       <div class="team-banner-title">${codeOf(sec)} · ${sec.name}</div>
-      <div class="team-banner-meta">${st.owned}/${st.total} figurinhas · ${pct(st.progress)}</div>
+      <div class="team-banner-meta">${pct(st.progress)} completo</div>
       <div class="team-banner-stats">
         <span>${st.missing} faltam</span>
         <span>${st.duplicates} repetidas</span>

@@ -1002,3 +1002,134 @@ body:before{
     min-height:2.45em;
   }
 }
+
+
+/* v0.11.3 — banner balance + centered sticker plates */
+.premium-team .team-banner .flag-badge{
+  top:50%;
+  transform:translateY(-50%);
+}
+.premium-team .team-banner-content{
+  gap:10px;
+}
+.premium-team .team-banner-topline{
+  align-items:center;
+}
+.premium-team .team-banner-topline .team-banner-count{
+  margin-left:0;
+}
+.premium-team .team-banner-meta{
+  font-weight:900;
+}
+.premium-team .sticker-card-v10 .sticker-face{
+  grid-template-rows:auto auto auto;
+  gap:10px;
+}
+.premium-team .sticker-plate-top,
+.premium-team .sticker-plate-bottom{
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+.premium-team .sticker-plate-top{
+  min-height:84px;
+  gap:6px;
+  padding:10px 10px 8px;
+}
+.premium-team .sticker-plate-bottom{
+  min-height:72px;
+  gap:4px;
+  padding:8px 10px;
+}
+.premium-team .sticker-number{
+  margin-top:0;
+}
+.premium-team .sticker-name{
+  min-height:2.5em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.premium-team .sticker-meta{
+  display:block;
+}
+@media (min-width: 900px){
+  .premium-team .section-visual.team-banner{
+    min-height:134px;
+  }
+  .premium-team .team-banner-content{
+    display:grid;
+    grid-template-columns:minmax(0,1.3fr) minmax(270px,.9fr);
+    grid-template-areas:
+      "topline stats"
+      "title stats"
+      "meta stats";
+    align-items:center;
+    gap:8px 20px;
+    padding:14px 106px 14px 94px;
+  }
+  .premium-team .team-banner-topline{
+    grid-area:topline;
+    justify-content:flex-start;
+    gap:10px;
+  }
+  .premium-team .team-banner-title{
+    grid-area:title;
+    font-size:clamp(26px,2vw,36px);
+    line-height:1.02;
+    margin:0;
+  }
+  .premium-team .team-banner-meta{
+    grid-area:meta;
+    font-size:15px;
+    line-height:1.2;
+    margin:0;
+  }
+  .premium-team .team-banner-stats{
+    grid-area:stats;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    align-items:center;
+    align-content:center;
+    gap:8px;
+    max-width:340px;
+    margin-left:auto;
+  }
+  .premium-team .team-banner-stats span{
+    min-width:96px;
+    padding:8px 12px;
+  }
+  .premium-team .team-banner .flag-badge{
+    left:16px;
+    width:60px;
+    height:60px;
+    border-radius:18px;
+  }
+}
+@media (max-width: 760px){
+  .premium-team .team-banner .flag-badge{
+    left:12px;
+    width:48px;
+    height:48px;
+    border-radius:15px;
+  }
+  .premium-team .sticker-plate-top{
+    min-height:80px;
+  }
+  .premium-team .sticker-plate-bottom{
+    min-height:70px;
+  }
+  .premium-team .sticker-name{
+    min-height:2.6em;
+  }
+}
+@media (max-width: 420px){
+  .premium-team .sticker-plate-top{
+    min-height:76px;
+  }
+  .premium-team .sticker-plate-bottom{
+    min-height:68px;
+  }
+}

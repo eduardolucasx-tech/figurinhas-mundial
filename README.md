@@ -38,3 +38,10 @@ Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel public
 - Banner desktop de cada seleção reorganizado para um visual mais horizontal.
 - Refinada a centralização interna das figurinhas no desktop e no mobile.
 - Mantido o banner mobile que já estava aprovado.
+
+
+## v0.11.3
+- Banner desktop reorganizado para ficar mais equilibrado e horizontal.
+- Contador X/20 movido para junto do grupo, acima do nome da seleção.
+- Bandeira centralizada verticalmente no banner.
+- Figurinhas com placas internas mais uniformes e conteúdo centralizado.
