@@ -476,187 +476,242 @@ body:before{
   border-color:rgba(245,199,82,.60);
 }
 
-
-/* v0.10.8 — alinhamento desktop/mobile das figurinhas e modal de marcação */
-.premium-team .sticker-grid{
-  align-items:stretch;
+/* v0.10.9 — desktop horizontal teams + mobile repeated/alignment fixes */
+.team-list.album-grid{
+  grid-template-columns:1fr;
+  gap:20px;
 }
-.sticker-card-v10{
-  height:100%;
+.premium-team{
+  width:100%;
 }
-.sticker-card-v10 .sticker-face{
-  display:grid;
-  grid-template-rows:minmax(78px,auto) minmax(64px,1fr) auto;
-  align-content:stretch;
+.premium-team .premium-team-top{
+  padding:16px 18px 0;
 }
-.sticker-plate{
+.premium-team .team-head{
+  align-items:center;
+}
+.premium-team .team-head > div{
   min-width:0;
 }
-.sticker-plate-top,
-.sticker-plate-bottom{
-  width:100%;
+.premium-team .team-head p{
+  white-space:normal;
 }
-.sticker-plate-bottom{
-  margin-top:0;
+.premium-team .sticker-grid{
+  padding:0 18px 18px;
+  grid-template-columns:repeat(10,minmax(0,1fr));
+  gap:10px;
 }
-.sticker-name{
-  overflow-wrap:anywhere;
-  word-break:break-word;
-  text-wrap:balance;
+.premium-team .sticker-card-v10{
+  min-height:156px;
+  border-radius:18px;
 }
-.sticker-status{
-  position:static;
-  left:auto;
-  right:auto;
-  bottom:auto;
-  width:100%;
-  margin-top:auto;
+.premium-team .sticker-card-v10 .sticker-face{
+  min-height:124px;
+  padding:8px 8px 6px;
+  gap:8px;
+}
+.premium-team .sticker-plate-top{
+  min-height:54px;
+  border-radius:16px 24px 16px 16px;
+  padding:8px 8px 6px;
+}
+.premium-team .sticker-plate-bottom{
+  min-height:42px;
+  border-radius:14px 14px 18px 18px;
+  padding:6px 8px;
+}
+.premium-team .sticker-code{
+  font-size:11px;
+  letter-spacing:.18em;
+}
+.premium-team .sticker-number{
+  font-size:22px;
+  margin-top:4px;
+}
+.premium-team .sticker-name{
+  font-size:10px!important;
+  line-height:1.05!important;
+  min-height:22px;
+}
+.premium-team .sticker-meta{
+  font-size:8px!important;
+  margin-top:2px;
+}
+.premium-team .sticker-status{
+  left:8px;
+  right:8px;
+  bottom:8px;
+  padding:4px 6px;
+  font-size:9px!important;
 }
 .sticker-corner{
   display:none!important;
 }
-.sticker-card-v10 .qty-row{
-  grid-template-columns:32px minmax(0,1fr) 32px;
-  gap:6px;
-  padding:6px;
+.premium-team .qty-row{
+  grid-template-columns:24px minmax(0,1fr) 24px;
+  gap:4px;
+  padding:4px;
+  min-height:34px;
 }
-.sticker-card-v10 .qty-row b{
+.premium-team .qty-row button{
+  width:24px;
+  min-width:24px;
+  height:24px;
+  border-radius:8px;
+  font-size:16px;
+  display:grid;
+  place-items:center;
+  padding:0;
+}
+.premium-team .qty-row b{
   min-width:0;
+  height:24px;
   display:grid;
   place-items:center;
-  height:28px;
-  border-radius:10px;
+  font-size:11px;
+  border-radius:8px;
 }
-.sticker-card-v10 .qty-btn{
-  width:32px;
-  min-width:32px;
-  height:28px;
-  display:grid;
-  place-items:center;
+.mark-results .result-item{
+  align-items:start;
 }
-@media (min-width:1180px){
+.mark-results .result-item > div:first-child{
+  min-width:0;
+}
+.mark-results .result-item strong,
+.mark-results .result-item .muted{
+  display:block;
+}
+.mark-results .qty-inline{
+  align-items:center;
+}
+
+@media (max-width:1060px){
+  .team-list.album-grid{
+    grid-template-columns:1fr;
+  }
+  .premium-team .premium-team-top{
+    padding:14px 14px 0;
+  }
   .premium-team .sticker-grid{
     grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:8px;
+    padding:0 14px 14px;
   }
-  .sticker-card-v10{
-    min-height:200px;
+  .premium-team .sticker-card-v10{
+    min-height:176px;
   }
-  .sticker-card-v10 .sticker-face{
-    min-height:164px;
-    padding:10px 10px 8px;
+  .premium-team .sticker-card-v10 .sticker-face{
+    min-height:144px;
+    padding:9px 9px 7px;
   }
-  .sticker-plate-top{
-    min-height:74px;
+  .premium-team .sticker-plate-top{
+    min-height:64px;
   }
-  .sticker-plate-bottom{
-    min-height:56px;
+  .premium-team .sticker-plate-bottom{
+    min-height:48px;
+  }
+  .premium-team .sticker-number{
+    font-size:23px;
+  }
+  .premium-team .sticker-name{
+    font-size:10px!important;
+    min-height:24px;
   }
 }
 @media (max-width:760px){
-  .sticker-card-v10 .sticker-face{
-    grid-template-rows:minmax(72px,auto) minmax(58px,1fr) auto;
+  .premium-team .sticker-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
   }
-}
-@media (max-width:520px){
-  .sticker-card-v10 .sticker-face{
-    grid-template-rows:minmax(64px,auto) minmax(54px,1fr) auto;
+  .premium-team .sticker-card-v10{
+    min-height:182px;
+    border-radius:20px;
   }
-  .sticker-card-v10 .qty-row{
-    grid-template-columns:28px minmax(0,1fr) 28px;
-    gap:4px;
-    padding:5px;
+  .premium-team .sticker-card-v10 .sticker-face{
+    min-height:150px;
+    padding:8px 8px 6px;
   }
-  .sticker-card-v10 .qty-btn{
-    width:28px;
-    min-width:28px;
-    height:26px;
+  .premium-team .sticker-plate-top{
+    min-height:68px;
+    border-radius:18px 28px 18px 18px;
   }
-  .sticker-card-v10 .qty-row b{
-    height:26px;
+  .premium-team .sticker-plate-bottom{
+    min-height:48px;
+    border-radius:16px 16px 22px 22px;
+  }
+  .premium-team .sticker-code{
     font-size:12px;
+    letter-spacing:.16em;
   }
-}
-.result-item{
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:14px;
-  align-items:center;
-}
-.result-main{
-  min-width:0;
-  display:grid;
-  gap:4px;
-}
-.result-ref{
-  font-size:17px;
-  line-height:1;
-}
-.result-sub{
-  color:#64748b;
-  line-height:1.25;
-  overflow-wrap:anywhere;
-}
-.result-controls{
-  display:grid;
-  grid-template-columns:auto auto;
-  align-items:center;
-  gap:10px;
-}
-.qty-inline{
-  grid-template-columns:36px minmax(34px,40px) 36px;
-  gap:6px;
-  align-items:center;
-}
-.qty-inline b{
-  display:grid;
-  place-items:center;
-  min-width:34px;
-  height:34px;
-  border-radius:11px;
-  background:#fff;
-  border:1px solid rgba(5,23,52,.08);
-  font-size:16px;
-}
-.qty-inline .qty-btn{
-  width:36px;
-  min-width:36px;
-  height:34px;
-  display:grid;
-  place-items:center;
-}
-.result-zero{
-  min-width:110px;
-  justify-self:end;
-}
-@media (max-width:700px){
+  .premium-team .sticker-number{
+    font-size:22px;
+  }
+  .premium-team .sticker-name{
+    font-size:10px!important;
+    line-height:1.1!important;
+    min-height:26px;
+  }
+  .premium-team .sticker-status{
+    left:8px;
+    right:8px;
+    bottom:8px;
+    font-size:9px!important;
+  }
   .dialog-card{
-    width:min(700px,calc(100vw - 16px));
+    width:min(94vw,760px);
+    padding:18px;
     border-radius:22px;
-    padding:16px;
   }
-  .mark-results{
-    max-height:52vh;
-    gap:10px;
-  }
-  .result-item{
-    grid-template-columns:1fr;
+  .mark-results .result-item{
     gap:12px;
-    padding:14px;
   }
-  .result-controls{
-    grid-template-columns:1fr;
-    justify-items:stretch;
-  }
-  .qty-inline{
-    grid-template-columns:44px minmax(44px,1fr) 44px;
+  .mark-results .qty-inline{
     width:100%;
+    grid-template-columns:44px minmax(34px,1fr) 44px;
+    grid-template-areas:
+      'dec qty inc'
+      'zero zero zero';
+    gap:8px;
   }
-  .qty-inline b,
-  .qty-inline .qty-btn{
-    height:38px;
+  .mark-results .qty-inline [data-dec]{grid-area:dec;}
+  .mark-results .qty-inline b{grid-area:qty;min-height:40px;display:grid;place-items:center;}
+  .mark-results .qty-inline [data-inc]{grid-area:inc;}
+  .mark-results .qty-inline .pill-btn{grid-area:zero;width:100%;padding:10px 12px;}
+}
+@media (max-width:420px){
+  .premium-team .sticker-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    padding:0 10px 10px;
   }
-  .result-zero{
-    min-width:0;
-    width:100%;
-    justify-self:stretch;
+  .premium-team .premium-team-top{
+    padding:10px 10px 0;
+  }
+  .premium-team .team-head{
+    gap:8px;
+  }
+  .premium-team .team-head h3{
+    font-size:18px;
+  }
+  .premium-team .team-head > strong{
+    min-width:54px;
+    padding:8px 8px;
+    font-size:13px;
+  }
+  .premium-team .team-mini-stats{
+    gap:6px;
+  }
+  .premium-team .team-mini-stats span{
+    font-size:10px;
+  }
+  .premium-team .sticker-card-v10.state-duplicate,
+  .premium-team .sticker-card-v10.state-owned,
+  .premium-team .sticker-card-v10.state-missing{
+    transform:none;
+  }
+}
+@media (max-width:380px){
+  .premium-team .sticker-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }

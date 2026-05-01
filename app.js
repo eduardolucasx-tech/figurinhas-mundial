@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.10.4-status-prata-dourado';
+const THEME_VERSION = '0.10.9-layout-horizontal-mobile-fix';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -555,6 +555,7 @@ function stickerButton(item){
   const showMeta = item.type && item.type !== 'jogador';
   const rarityClass = item.number === 1 ? 'rarity-silver' : item.number === 13 ? 'rarity-gold' : 'rarity-base';
   const stateClass = q > 1 ? 'state-duplicate' : q === 1 ? 'state-owned' : 'state-missing';
+  const cornerText = q > 1 ? `x${q}` : q === 1 ? '✓' : '';
   const statusText = q > 1 ? `Rep. +${q-1}` : (q === 1 ? 'Tenho' : 'Falta');
   return `<div class="sticker sticker-card-v10 ${rarityClass} ${stateClass} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
     <button class="sticker-main sticker-face" data-open="${item.id}">
@@ -566,6 +567,7 @@ function stickerButton(item){
         <strong class="sticker-name">${escapeHtml(displayName)}</strong>
         ${showMeta ? `<span class="sticker-meta">${escapeHtml(typeLabel)}</span>` : ''}
       </span>
+      <span class="sticker-corner ${stateClass}">${cornerText}</span>
       <span class="sticker-status ${stateClass}">${statusText}</span>
     </button>
     <div class="qty-row"><button class="qty-btn dec" data-dec="${item.id}" aria-label="Remover">−</button><b>${q}</b><button class="qty-btn inc" data-inc="${item.id}" aria-label="Adicionar">+</button></div>
@@ -963,25 +965,7 @@ window.addEventListener('offline', () => setSync('offline','Offline','Alteraçõ
 function renderQuickResults(){
   const q = $('#markSearch').value.trim().toLowerCase();
   const results = albumItems.filter(i => matchItem(i, q, '')).slice(0, 100);
-  $('#markResults').innerHTML = results.map(i => {
-    const qty = quantity(i.id);
-    const extra = extrasOf(i);
-    const status = qty > 1 ? `Repetida · +${extra}` : qty === 1 ? 'Tenho' : 'Falta';
-    return `<div class="result-item ${statusClass(i)}">
-      <div class="result-main">
-        <strong class="result-ref">${escapeHtml(i.ref)}</strong>
-        <span class="result-sub">${escapeHtml(i.section)} · ${status} · qtd ${qty}</span>
-      </div>
-      <div class="result-controls">
-        <div class="qty-inline">
-          <button type="button" class="qty-btn dec" data-dec="${i.id}" aria-label="Remover figurinha">−</button>
-          <b>${qty}</b>
-          <button type="button" class="qty-btn inc" data-inc="${i.id}" aria-label="Adicionar figurinha">+</button>
-        </div>
-        <button type="button" class="pill-btn result-zero" data-zero="${i.id}">Zerar</button>
-      </div>
-    </div>`;
-  }).join('');
+  $('#markResults').innerHTML = results.map(i => `<div class="result-item ${statusClass(i)}"><div><strong>${i.ref}</strong><br><span class="muted">${i.section} · ${statusLabel(i)} · qtd ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span></div><div class="qty-inline"><button type="button" class="qty-btn dec" data-dec="${i.id}">−</button><b>${quantity(i.id)}</b><button type="button" class="qty-btn inc" data-inc="${i.id}">+</button><button type="button" class="pill-btn" data-zero="${i.id}">Zerar</button></div></div>`).join('');
   $$('[data-inc]', $('#markResults')).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.inc, 1); animateQtyButton(b); renderQuickResults(); }));
   $$('[data-dec]', $('#markResults')).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.dec, -1); animateQtyButton(b); renderQuickResults(); }));
   $$('[data-zero]', $('#markResults')).forEach(b => b.addEventListener('click', () => { setQuantity(b.dataset.zero, 0, `${itemById(b.dataset.zero).ref} zerada`); renderQuickResults(); }));
