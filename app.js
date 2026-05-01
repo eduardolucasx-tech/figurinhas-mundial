@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.10.9-layout-horizontal-mobile-fix';
+const THEME_VERSION = '0.11.0-merge-local-cloud';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -299,6 +299,38 @@ function normalizeState(input){
     updatedAt: input.updatedAt || new Date().toISOString()
   };
 }
+
+function statesDiffer(a, b){
+  return JSON.stringify(a?.quantities || {}) !== JSON.stringify(b?.quantities || {})
+    || JSON.stringify(a?.tradeStatus || {}) !== JSON.stringify(b?.tradeStatus || {})
+    || JSON.stringify(a?.contacts || {}) !== JSON.stringify(b?.contacts || {})
+    || JSON.stringify(a?.notes || {}) !== JSON.stringify(b?.notes || {});
+}
+function mergeLocalAndRemoteStates(localInput, remoteInput){
+  const base = initialState();
+  const local = normalizeState(localInput || {});
+  const remote = normalizeState(remoteInput || {});
+  const merged = normalizeState({...base, ...remote});
+
+  albumItems.forEach(item => {
+    const id = item.id;
+    const localQty = Math.max(0, Number(local.quantities?.[id] || 0));
+    const remoteQty = Math.max(0, Number(remote.quantities?.[id] || 0));
+    merged.quantities[id] = Math.max(localQty, remoteQty);
+
+    merged.tradeStatus[id] = local.tradeStatus?.[id] || remote.tradeStatus?.[id] || '';
+    merged.contacts[id] = local.contacts?.[id] || remote.contacts?.[id] || '';
+    merged.notes[id] = local.notes?.[id] || remote.notes?.[id] || '';
+  });
+
+  merged.history = [
+    ...(Array.isArray(local.history) ? local.history : []),
+    ...(Array.isArray(remote.history) ? remote.history : [])
+  ].slice(0, 80);
+  merged.updatedAt = new Date().toISOString();
+  return merged;
+}
+
 function saveState(options = {}){
   state.updatedAt = new Date().toISOString();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -892,22 +924,40 @@ async function loadCloud(showToast = true, options = {}){
   const doc = cloudDoc();
   if (!doc) return showToast && toast('Entre com Google para sincronizar.');
   try {
-    setSync('syncing','Sincronizando...', familyCode ? `Carregando família ${familyCode}.` : 'Carregando dados da nuvem.');
+    const merging = !!options.mergeLocal;
+    const localBeforeLoad = normalizeState(state);
+    setSync('syncing','Sincronizando...', merging ? 'Mesclando alterações locais com a nuvem.' : (familyCode ? `Carregando família ${familyCode}.` : 'Carregando dados da nuvem.'));
     const snap = await doc.get();
     if (!snap.exists || !snap.data().state) {
-      setSync('ok','Sincronizado', familyCode ? `Família ${familyCode} pronta.` : 'Primeiro backup será criado ao marcar ou sincronizar.');
+      if (merging) {
+        await saveCloud(false);
+        setSync('ok','Sincronizado', familyCode ? `Família ${familyCode}` : 'Alterações locais enviadas para a nuvem.');
+        if (showToast) toast('Alterações locais enviadas para a nuvem.');
+      } else {
+        setSync('ok','Sincronizado', familyCode ? `Família ${familyCode} pronta.` : 'Primeiro backup será criado ao marcar ou sincronizar.');
+      }
       return false;
     }
     const remote = normalizeState(snap.data().state);
-    const localTime = Date.parse(state.updatedAt || 0);
-    const remoteTime = Date.parse(remote.updatedAt || 0);
-    const remoteChanged = JSON.stringify(remote.quantities || {}) !== JSON.stringify(state.quantities || {})
-      || JSON.stringify(remote.tradeStatus || {}) !== JSON.stringify(state.tradeStatus || {});
-    if (options.preferRemote || familyCode || remoteTime > localTime || remoteChanged) {
-      state = remote;
+
+    if (merging && !options.preferRemote) {
+      const merged = mergeLocalAndRemoteStates(localBeforeLoad, remote);
+      const mergedChangedRemote = statesDiffer(merged, remote);
+      state = merged;
       saveState({skipCloud:true});
-      if (showToast) toast(familyCode ? 'Coleção da família carregada.' : 'Dados carregados da nuvem.');
+      if (mergedChangedRemote) await saveCloud(false);
+      if (showToast) toast('Alterações locais e da nuvem foram mescladas.');
+    } else {
+      const localTime = Date.parse(state.updatedAt || 0);
+      const remoteTime = Date.parse(remote.updatedAt || 0);
+      const remoteChanged = statesDiffer(remote, state);
+      if (options.preferRemote || familyCode || remoteTime > localTime || remoteChanged) {
+        state = remote;
+        saveState({skipCloud:true});
+        if (showToast) toast(familyCode ? 'Coleção da família carregada.' : 'Dados carregados da nuvem.');
+      }
     }
+
     cloud.lastSyncAt = new Date();
     setSync('ok','Sincronizado', familyCode ? `Família ${familyCode}` : 'Dados atualizados.');
     return true;
@@ -915,8 +965,8 @@ async function loadCloud(showToast = true, options = {}){
 }
 async function syncNow(showToast = true){
   if (!cloud.user) return showToast && toast('Entre com Google para sincronizar.');
-  const existed = await loadCloud(false);
-  if (!existed || !familyCode) await saveCloud(false);
+  const existed = await loadCloud(false, {mergeLocal:true});
+  if (!existed) await saveCloud(false);
   if (showToast) toast(familyCode ? 'Família sincronizada.' : 'Sincronização concluída.');
   startCloudListener();
   render();

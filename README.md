@@ -18,3 +18,10 @@ Atualização visual focada no layout das figurinhas.
 ## Deploy
 
 Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel publicar e teste com Ctrl + F5.
+
+
+## v0.11.0
+- Correção importante de sincronização: se o Google deslogar e você marcar figurinhas no modo local, ao entrar novamente o app agora mescla local + nuvem.
+- A mesclagem preserva a maior quantidade de cada figurinha para evitar perda de figurinhas marcadas offline.
+- Se a coleção da nuvem ainda não existir, o estado local é enviado automaticamente no login.
+- Mantido layout horizontal no desktop e ajuste mobile.
