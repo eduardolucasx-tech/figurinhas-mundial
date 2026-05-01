@@ -886,3 +886,119 @@ body:before{
   .premium-team .team-banner-count{font-size:16px;min-width:48px;padding:5px 8px;}
   .premium-team .team-banner-stats span{font-size:10px;padding:4px 7px;}
 }
+
+
+/* v0.11.2 — desktop banner more horizontal + sticker centering refinements */
+@media (min-width: 900px){
+  .premium-team .section-visual.team-banner{
+    min-height:132px;
+    border-radius:20px;
+  }
+  .premium-team .team-banner-content{
+    display:grid;
+    grid-template-columns:minmax(0,1.6fr) minmax(220px,.95fr);
+    grid-template-areas:
+      "topline stats"
+      "title stats"
+      "meta stats";
+    align-items:center;
+    gap:6px 18px;
+    padding:14px 104px 14px 88px;
+  }
+  .premium-team .team-banner-topline{
+    grid-area:topline;
+    justify-content:flex-start;
+    align-items:center;
+    gap:12px;
+  }
+  .premium-team .team-banner-topline .team-banner-count{
+    margin-left:auto;
+    flex:0 0 auto;
+  }
+  .premium-team .team-banner-title{
+    grid-area:title;
+    font-size:clamp(24px,2vw,34px);
+    line-height:1.02;
+  }
+  .premium-team .team-banner-meta{
+    grid-area:meta;
+    font-size:15px;
+    line-height:1.2;
+  }
+  .premium-team .team-banner-stats{
+    grid-area:stats;
+    justify-content:flex-end;
+    align-content:center;
+    align-self:center;
+    gap:8px;
+    max-width:340px;
+    margin-left:auto;
+  }
+  .premium-team .team-banner-stats span{
+    min-width:92px;
+    justify-content:center;
+    text-align:center;
+    white-space:nowrap;
+  }
+}
+
+.premium-team .sticker-card-v10{
+  display:flex;
+  flex-direction:column;
+}
+.premium-team .sticker-card-v10 .sticker-face{
+  display:grid;
+  grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto;
+  align-items:stretch;
+  justify-items:stretch;
+}
+.premium-team .sticker-plate,
+.premium-team .sticker-plate-top,
+.premium-team .sticker-plate-bottom{
+  box-sizing:border-box;
+  width:100%;
+}
+.premium-team .sticker-plate-top,
+.premium-team .sticker-plate-bottom{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.premium-team .sticker-plate-top{
+  padding:8px 8px 6px;
+}
+.premium-team .sticker-plate-bottom{
+  padding:6px 8px;
+}
+.premium-team .sticker-code,
+.premium-team .sticker-number,
+.premium-team .sticker-name,
+.premium-team .sticker-meta{
+  width:100%;
+  text-align:center;
+  margin-left:auto;
+  margin-right:auto;
+}
+.premium-team .sticker-number{
+  margin-top:4px;
+}
+.premium-team .sticker-name{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:2.25em;
+}
+.premium-team .sticker-status{
+  position:static;
+  left:auto;
+  right:auto;
+  bottom:auto;
+  margin:0;
+  width:100%;
+}
+@media (max-width: 760px){
+  .premium-team .sticker-name{
+    min-height:2.45em;
+  }
+}

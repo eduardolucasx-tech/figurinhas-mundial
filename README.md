@@ -32,3 +32,9 @@ Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel public
 - Restaurado visual do banner com cores inspiradas na bandeira de cada seleção.
 - Ajustado o layout interno das figurinhas para melhor centralização no desktop e no mobile.
 - O contador principal do álbum volta a usar o total real de 994 figurinhas.
+
+
+## v0.11.2
+- Banner desktop de cada seleção reorganizado para um visual mais horizontal.
+- Refinada a centralização interna das figurinhas no desktop e no mobile.
+- Mantido o banner mobile que já estava aprovado.
