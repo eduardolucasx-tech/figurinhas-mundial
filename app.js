@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.10.1-nomes-completos';
+const THEME_VERSION = '0.10.2-contraste-e-legado';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -227,6 +227,48 @@ function escapeHtml(s){ return String(s ?? '').replaceAll('&','&amp;').replaceAl
 function csv(v){ return `"${String(v).replaceAll('"','""')}"`; }
 function nowText(){ return new Date().toLocaleString('pt-BR'); }
 
+function pad2(n){ return String(n).padStart(2, '0'); }
+function legacyAliasesForItem(item){
+  const n = Number(item.number || 0);
+  const p = pad2(n);
+  const aliases = new Set([
+    item.id,
+    `${item.code}-${p}`,
+    `${item.code}-${n}`,
+    `${codeOf(item)}-${p}`,
+    `${codeOf(item)}-${n}`
+  ]);
+  if (item.code === 'COC') {
+    aliases.add(`CC-${p}`);
+    aliases.add(`CC-${n}`);
+    aliases.add(`COC-${p}`);
+    aliases.add(`COC-${n}`);
+  }
+  if (item.code === 'FWC') {
+    aliases.add(`FWC-${p}`);
+    aliases.add(`FWC-${n}`);
+  }
+  return [...aliases];
+}
+function remapRecordByAlbumItems(record, fallbackValue){
+  const input = record || {};
+  const mapped = {};
+  albumItems.forEach(item => {
+    let found;
+    for (const key of legacyAliasesForItem(item)) {
+      if (Object.prototype.hasOwnProperty.call(input, key) && input[key] !== undefined && input[key] !== null && input[key] !== '') {
+        found = input[key];
+        break;
+      }
+    }
+    if (found !== undefined) mapped[item.id] = found;
+  });
+  Object.keys(input).forEach(key => {
+    if (!Object.prototype.hasOwnProperty.call(mapped, key)) mapped[key] = input[key];
+  });
+  return mapped;
+}
+
 function loadState(){
   const base = initialState();
   const keys = [STORAGE_KEY, ...LEGACY_KEYS];
@@ -242,13 +284,17 @@ function loadState(){
 }
 function normalizeState(input){
   const base = initialState();
+  const quantities = remapRecordByAlbumItems(input.quantities || {});
+  const tradeStatus = remapRecordByAlbumItems(input.tradeStatus || {});
+  const contacts = remapRecordByAlbumItems(input.contacts || {});
+  const notes = remapRecordByAlbumItems(input.notes || {});
   return {
     ...base,
     ...input,
-    quantities: {...base.quantities, ...(input.quantities || {})},
-    tradeStatus: {...(input.tradeStatus || {})},
-    contacts: {...(input.contacts || {})},
-    notes: {...(input.notes || {})},
+    quantities: {...base.quantities, ...quantities},
+    tradeStatus: {...tradeStatus},
+    contacts: {...contacts},
+    notes: {...notes},
     history: Array.isArray(input.history) ? input.history.slice(0, 80) : [],
     updatedAt: input.updatedAt || new Date().toISOString()
   };
@@ -430,14 +476,14 @@ function renderAlbum(){
     <div class="album-hero album-hero-compact album-hero-total premium-hero" aria-label="Resumo do álbum">
       <div class="album-hero-main">
         <span class="label">Meu álbum da Copa</span>
-        <h3>${tenhoFigurinhas}/${totalFigurinhas} únicas</h3>
-        <p class="hero-subline">Total real = tenho + repetidas. ${acervoFisico} figurinhas no acervo.</p>
+        <h3>${tenhoFigurinhas}/${totalFigurinhas} coladas</h3>
+        <p class="hero-subline">${tenhoFigurinhas} no álbum + ${repetidasFigurinhas} repetidas = ${acervoFisico} no acervo.</p>
       </div>
       <div class="album-hero-status summary-only">
         <span><b>${pct(progressoAlbum)}</b> completo</span>
         <span><b>${faltantesFigurinhas}</b> faltantes</span>
         <span><b>${repetidasFigurinhas}</b> repetidas</span>
-        <span><b>${acervoFisico}</b> total de figurinhas</span>
+        <span><b>${acervoFisico}</b> total no acervo</span>
       </div>
     </div>
     <div class="filters album-filters">
@@ -506,12 +552,14 @@ function stickerButton(item){
   const st = statusLabel(item);
   const displayName = item.name || item.section;
   const typeLabel = stickerTypeLabel(item.type);
+  const showMeta = item.type && item.type !== 'jogador';
+  const statusText = q > 1 ? `x${q} · +${q-1} rep.` : st;
   return `<div class="sticker sticker-card-v10 ${statusClass(item)} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
     <button class="sticker-main sticker-face" data-open="${item.id}">
       <span class="sticker-code">${escapeHtml(item.ref)}</span>
       <strong class="sticker-name">${escapeHtml(displayName)}</strong>
-      <span class="sticker-meta">${escapeHtml(typeLabel)}</span>
-      <span class="sticker-status ${statusClass(item)}">${q > 1 ? `x${q} · +${q-1} repetida${q-1 > 1 ? 's' : ''}` : st}</span>
+      ${showMeta ? `<span class="sticker-meta">${escapeHtml(typeLabel)}</span>` : `<span class="sticker-meta sticker-meta-empty"></span>`}
+      <span class="sticker-status ${statusClass(item)}">${statusText}</span>
     </button>
     <div class="qty-row"><button class="qty-btn dec" data-dec="${item.id}" aria-label="Remover">−</button><b>${q}</b><button class="qty-btn inc" data-inc="${item.id}" aria-label="Adicionar">+</button></div>
   </div>`;
