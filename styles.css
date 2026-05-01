@@ -716,420 +716,397 @@ body:before{
   }
 }
 
-
-/* v0.11.1 — banner info inside horizontal header + sticker centering fixes */
-.premium-team{
-  background:rgba(255,250,240,.94);
-}
+/* v0.11.1 — correção de banner horizontal e miolo uniforme das figurinhas */
 .premium-team .premium-team-top{
-  padding:12px 14px 0;
+  padding:14px 18px 0;
 }
 .premium-team .section-visual.team-banner{
-  min-height:148px;
+  display:grid;
+  grid-template-columns:64px minmax(0,1fr);
+  align-items:center;
+  column-gap:16px;
+  min-height:124px;
+  padding:16px 20px 16px 16px;
   margin-bottom:12px;
 }
-.premium-team .team-banner-content{
-  position:absolute;
-  inset:0;
+.premium-team .team-banner .flag-badge{
+  position:relative;
+  left:auto;
+  top:auto;
+  width:56px;
+  height:56px;
+  margin:0;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  align-self:center;
+  justify-self:start;
   z-index:2;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:8px;
-  padding:16px 18px 16px 90px;
-  color:#fff;
 }
-.premium-team .team-banner-topline{
+.premium-team .team-banner .banner-copy{
+  position:relative;
+  z-index:2;
+  min-width:0;
+  display:grid;
+  gap:6px;
+  padding-right:108px;
+}
+.premium-team .team-banner .banner-top-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
 }
-.premium-team .team-banner .badge{
-  background:rgba(255,255,255,.88);
-  color:#0b3b8f;
-  backdrop-filter:blur(6px);
+.premium-team .team-banner .banner-group{
+  width:max-content;
 }
-.premium-team .team-banner-count{
+.premium-team .team-banner .banner-count{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-width:64px;
+  min-width:84px;
   padding:8px 12px;
-  border-radius:16px;
+  border-radius:18px;
   background:#061a46;
   color:#fff;
-  font-weight:900;
-  font-size:26px;
+  font-size:16px;
   line-height:1;
-}
-.premium-team .team-banner-title{
-  font-size:34px;
-  font-weight:900;
-  line-height:1.02;
+  font-weight:1000;
   letter-spacing:-.03em;
-  text-shadow:0 2px 10px rgba(0,0,0,.20);
+  box-shadow:0 10px 22px rgba(6,26,70,.22);
 }
-.premium-team .team-banner-meta{
-  font-size:18px;
-  font-weight:800;
-  color:rgba(255,255,255,.92);
+.premium-team .team-banner .banner-title-row h3{
+  margin:0;
+  color:#fff;
+  font-size:22px;
+  line-height:1.06;
+  letter-spacing:-.04em;
+  font-weight:950;
+  text-wrap:balance;
 }
-.premium-team .team-banner-stats{
+.premium-team .team-banner .banner-subline{
+  color:rgba(255,255,255,.96);
+  font-size:15px;
+  font-weight:850;
+  line-height:1.1;
+}
+.premium-team .team-banner .banner-stats{
   display:flex;
   flex-wrap:wrap;
   gap:8px;
 }
-.premium-team .team-banner-stats span{
+.premium-team .team-banner .banner-stats span{
   display:inline-flex;
   align-items:center;
-  justify-content:center;
+  min-height:32px;
+  padding:6px 12px;
   border-radius:999px;
-  padding:7px 10px;
+  background:rgba(255,250,240,.92);
+  color:#213047;
   font-size:13px;
   font-weight:900;
-  background:rgba(255,248,230,.92);
-  color:#243240;
-  box-shadow:0 8px 18px rgba(5,23,52,.12);
-}
-.premium-team .team-banner .flag-badge{
-  left:16px;
-  top:16px;
-  width:58px;
-  height:58px;
-  border-radius:18px;
-  z-index:3;
+  border:1px solid rgba(255,255,255,.62);
+  box-shadow:0 8px 18px rgba(5,23,52,.10);
 }
 .premium-team .team-banner .visual-ball{
-  z-index:1;
+  right:18px;
+  bottom:14px;
 }
 .premium-team .team-banner i,
 .premium-team .team-banner b{
   z-index:1;
 }
+
 .premium-team .sticker-grid{
-  padding:0 14px 14px;
+  grid-template-columns:repeat(10,minmax(0,1fr));
+  gap:10px;
+  padding:0 18px 18px;
 }
 .premium-team .sticker-card-v10{
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
+  min-height:156px;
+  display:grid;
+  grid-template-rows:1fr auto;
+  border-radius:18px;
 }
 .premium-team .sticker-card-v10 .sticker-face{
-  display:flex;
-  flex-direction:column;
+  min-height:0;
+  display:grid;
+  grid-template-rows:56px 1fr 48px 24px;
   align-items:stretch;
-  justify-content:space-between;
-  gap:8px;
+  justify-items:stretch;
+  gap:7px;
+  padding:8px 8px 6px;
+  box-sizing:border-box;
+}
+.premium-team .sticker-card-v10 .sticker-face > *{
+  box-sizing:border-box;
 }
 .premium-team .sticker-plate{
   width:100%;
-  box-sizing:border-box;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding-left:8px;
-  padding-right:8px;
-}
-.premium-team .sticker-plate-top,
-.premium-team .sticker-plate-bottom{
-  margin:0;
-}
-.premium-team .sticker-code,
-.premium-team .sticker-number,
-.premium-team .sticker-name,
-.premium-team .sticker-meta{
-  display:block;
-  width:100%;
-  text-align:center;
-}
-.premium-team .sticker-name{
-  overflow-wrap:anywhere;
-  word-break:break-word;
-}
-.premium-team .sticker-status{
-  left:10px;
-  right:10px;
-}
-@media (max-width:1200px){
-  .premium-team .team-banner-title{font-size:28px;}
-  .premium-team .team-banner-meta{font-size:16px;}
-}
-@media (max-width:1060px){
-  .premium-team .section-visual.team-banner{min-height:150px;}
-  .premium-team .team-banner-content{padding:14px 16px 14px 84px;gap:7px;}
-  .premium-team .team-banner-title{font-size:26px;}
-  .premium-team .team-banner-meta{font-size:15px;}
-  .premium-team .team-banner-count{font-size:22px;min-width:60px;padding:7px 10px;}
-  .premium-team .team-banner-stats span{font-size:12px;padding:6px 9px;}
-}
-@media (max-width:760px){
-  .premium-team .premium-team-top{padding:10px 10px 0;}
-  .premium-team .section-visual.team-banner{min-height:144px;border-radius:18px;}
-  .premium-team .team-banner-content{padding:12px 12px 12px 78px;gap:6px;}
-  .premium-team .team-banner-title{font-size:22px;line-height:1.04;}
-  .premium-team .team-banner-meta{font-size:13px;}
-  .premium-team .team-banner-topline{gap:8px;}
-  .premium-team .team-banner-count{font-size:18px;min-width:52px;padding:6px 8px;border-radius:14px;}
-  .premium-team .team-banner-stats{gap:6px;}
-  .premium-team .team-banner-stats span{font-size:11px;padding:5px 8px;}
-  .premium-team .team-banner .flag-badge{width:48px;height:48px;border-radius:15px;left:12px;top:12px;}
-}
-@media (max-width:420px){
-  .premium-team .section-visual.team-banner{min-height:140px;}
-  .premium-team .team-banner-content{padding:10px 10px 10px 70px;}
-  .premium-team .team-banner-title{font-size:20px;}
-  .premium-team .team-banner-meta{font-size:12px;}
-  .premium-team .team-banner .badge{font-size:10px;padding:4px 8px;}
-  .premium-team .team-banner-count{font-size:16px;min-width:48px;padding:5px 8px;}
-  .premium-team .team-banner-stats span{font-size:10px;padding:4px 7px;}
-}
-
-
-/* v0.11.2 — desktop banner more horizontal + sticker centering refinements */
-@media (min-width: 900px){
-  .premium-team .section-visual.team-banner{
-    min-height:132px;
-    border-radius:20px;
-  }
-  .premium-team .team-banner-content{
-    display:grid;
-    grid-template-columns:minmax(0,1.6fr) minmax(220px,.95fr);
-    grid-template-areas:
-      "topline stats"
-      "title stats"
-      "meta stats";
-    align-items:center;
-    gap:6px 18px;
-    padding:14px 104px 14px 88px;
-  }
-  .premium-team .team-banner-topline{
-    grid-area:topline;
-    justify-content:flex-start;
-    align-items:center;
-    gap:12px;
-  }
-  .premium-team .team-banner-topline .team-banner-count{
-    margin-left:auto;
-    flex:0 0 auto;
-  }
-  .premium-team .team-banner-title{
-    grid-area:title;
-    font-size:clamp(24px,2vw,34px);
-    line-height:1.02;
-  }
-  .premium-team .team-banner-meta{
-    grid-area:meta;
-    font-size:15px;
-    line-height:1.2;
-  }
-  .premium-team .team-banner-stats{
-    grid-area:stats;
-    justify-content:flex-end;
-    align-content:center;
-    align-self:center;
-    gap:8px;
-    max-width:340px;
-    margin-left:auto;
-  }
-  .premium-team .team-banner-stats span{
-    min-width:92px;
-    justify-content:center;
-    text-align:center;
-    white-space:nowrap;
-  }
-}
-
-.premium-team .sticker-card-v10{
-  display:flex;
-  flex-direction:column;
-}
-.premium-team .sticker-card-v10 .sticker-face{
-  display:grid;
-  grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto;
-  align-items:stretch;
-  justify-items:stretch;
-}
-.premium-team .sticker-plate,
-.premium-team .sticker-plate-top,
-.premium-team .sticker-plate-bottom{
-  box-sizing:border-box;
-  width:100%;
-}
-.premium-team .sticker-plate-top,
-.premium-team .sticker-plate-bottom{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
 }
 .premium-team .sticker-plate-top{
-  padding:8px 8px 6px;
+  min-height:0;
+  height:56px;
+  margin:0;
+  padding:7px 8px 6px;
+  display:grid;
+  align-content:center;
+  justify-items:center;
+  border-radius:16px 24px 16px 16px;
 }
 .premium-team .sticker-plate-bottom{
+  min-height:0;
+  height:48px;
+  margin:0;
   padding:6px 8px;
+  display:grid;
+  place-items:center;
+  border-radius:14px 14px 18px 18px;
 }
 .premium-team .sticker-code,
 .premium-team .sticker-number,
 .premium-team .sticker-name,
 .premium-team .sticker-meta{
-  width:100%;
   text-align:center;
-  margin-left:auto;
-  margin-right:auto;
+}
+.premium-team .sticker-code{
+  display:block;
+  font-size:11px;
+  line-height:1;
+  letter-spacing:.18em;
 }
 .premium-team .sticker-number{
-  margin-top:4px;
+  display:block;
+  margin-top:3px;
+  font-size:22px;
+  line-height:1;
 }
 .premium-team .sticker-name{
+  width:100%;
+  min-height:0;
+  margin:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  min-height:2.25em;
+  font-size:10px!important;
+  line-height:1.05!important;
+  letter-spacing:.05em;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  text-wrap:balance;
+}
+.premium-team .sticker-meta{
+  display:block;
+  margin-top:2px;
+  font-size:8px!important;
+  line-height:1;
+}
+.premium-team .sticker-corner{
+  display:none!important;
 }
 .premium-team .sticker-status{
   position:static;
   left:auto;
   right:auto;
   bottom:auto;
-  margin:0;
   width:100%;
+  min-height:22px;
+  margin:0;
+  display:grid;
+  place-items:center;
+  padding:4px 6px;
+  font-size:9px!important;
+  line-height:1;
 }
-@media (max-width: 760px){
-  .premium-team .sticker-name{
-    min-height:2.45em;
-  }
-}
-
-
-/* v0.11.3 — banner balance + centered sticker plates */
-.premium-team .team-banner .flag-badge{
-  top:50%;
-  transform:translateY(-50%);
-}
-.premium-team .team-banner-content{
-  gap:10px;
-}
-.premium-team .team-banner-topline{
-  align-items:center;
-}
-.premium-team .team-banner-topline .team-banner-count{
-  margin-left:0;
-}
-.premium-team .team-banner-meta{
-  font-weight:900;
-}
-.premium-team .sticker-card-v10 .sticker-face{
-  grid-template-rows:auto auto auto;
-  gap:10px;
-}
-.premium-team .sticker-plate-top,
-.premium-team .sticker-plate-bottom{
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-}
-.premium-team .sticker-plate-top{
-  min-height:84px;
-  gap:6px;
-  padding:10px 10px 8px;
-}
-.premium-team .sticker-plate-bottom{
-  min-height:72px;
+.premium-team .qty-row{
+  grid-template-columns:24px minmax(0,1fr) 24px;
   gap:4px;
-  padding:8px 10px;
+  padding:4px;
+  min-height:34px;
 }
-.premium-team .sticker-number{
-  margin-top:0;
+.premium-team .qty-row button{
+  width:24px;
+  min-width:24px;
+  height:24px;
+  border-radius:8px;
+  font-size:16px;
+  display:grid;
+  place-items:center;
+  padding:0;
 }
-.premium-team .sticker-name{
-  min-height:2.5em;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
+.premium-team .qty-row b{
+  min-width:0;
+  height:24px;
+  display:grid;
+  place-items:center;
+  font-size:11px;
+  border-radius:8px;
 }
-.premium-team .sticker-meta{
-  display:block;
-}
-@media (min-width: 900px){
+
+@media (max-width:1060px){
   .premium-team .section-visual.team-banner{
-    min-height:134px;
+    min-height:120px;
+    padding:14px 16px;
   }
-  .premium-team .team-banner-content{
-    display:grid;
-    grid-template-columns:minmax(0,1.3fr) minmax(270px,.9fr);
-    grid-template-areas:
-      "topline stats"
-      "title stats"
-      "meta stats";
-    align-items:center;
-    gap:8px 20px;
-    padding:14px 106px 14px 94px;
+  .premium-team .team-banner .banner-copy{
+    padding-right:92px;
   }
-  .premium-team .team-banner-topline{
-    grid-area:topline;
-    justify-content:flex-start;
-    gap:10px;
+  .premium-team .team-banner .banner-title-row h3{
+    font-size:20px;
   }
-  .premium-team .team-banner-title{
-    grid-area:title;
-    font-size:clamp(26px,2vw,36px);
-    line-height:1.02;
-    margin:0;
+  .premium-team .team-banner .banner-subline{
+    font-size:14px;
   }
-  .premium-team .team-banner-meta{
-    grid-area:meta;
-    font-size:15px;
-    line-height:1.2;
-    margin:0;
+  .premium-team .team-banner .banner-stats span{
+    min-height:30px;
+    font-size:12px;
   }
-  .premium-team .team-banner-stats{
-    grid-area:stats;
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:flex-end;
-    align-items:center;
-    align-content:center;
+  .premium-team .sticker-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
     gap:8px;
-    max-width:340px;
-    margin-left:auto;
+    padding:0 14px 14px;
   }
-  .premium-team .team-banner-stats span{
-    min-width:96px;
-    padding:8px 12px;
+  .premium-team .sticker-card-v10{
+    min-height:176px;
   }
-  .premium-team .team-banner .flag-badge{
-    left:16px;
-    width:60px;
-    height:60px;
-    border-radius:18px;
+  .premium-team .sticker-card-v10 .sticker-face{
+    grid-template-rows:64px 1fr 50px 26px;
+    gap:8px;
+    padding:9px 9px 7px;
+  }
+  .premium-team .sticker-plate-top{
+    height:64px;
+  }
+  .premium-team .sticker-plate-bottom{
+    height:50px;
+  }
+  .premium-team .sticker-code{
+    font-size:12px;
+  }
+  .premium-team .sticker-number{
+    font-size:23px;
+  }
+  .premium-team .sticker-name{
+    font-size:10px!important;
+    min-height:0;
+  }
+  .premium-team .sticker-status{
+    font-size:9px!important;
   }
 }
-@media (max-width: 760px){
+@media (max-width:760px){
+  .premium-team .premium-team-top{
+    padding:12px 12px 0;
+  }
+  .premium-team .section-visual.team-banner{
+    min-height:116px;
+    padding:12px 12px 12px 12px;
+    grid-template-columns:52px minmax(0,1fr);
+    column-gap:12px;
+  }
   .premium-team .team-banner .flag-badge{
-    left:12px;
     width:48px;
     height:48px;
-    border-radius:15px;
+    border-radius:16px;
+  }
+  .premium-team .team-banner .banner-copy{
+    gap:5px;
+    padding-right:78px;
+  }
+  .premium-team .team-banner .banner-count{
+    min-width:68px;
+    padding:7px 10px;
+    font-size:14px;
+  }
+  .premium-team .team-banner .banner-title-row h3{
+    font-size:18px;
+  }
+  .premium-team .team-banner .banner-subline{
+    font-size:13px;
+  }
+  .premium-team .team-banner .banner-stats{
+    gap:6px;
+  }
+  .premium-team .team-banner .banner-stats span{
+    min-height:28px;
+    padding:5px 10px;
+    font-size:11px;
+  }
+  .premium-team .team-banner .visual-ball{
+    right:14px;
+    bottom:12px;
+    font-size:28px;
+  }
+  .premium-team .sticker-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+    padding:0 12px 12px;
+  }
+  .premium-team .sticker-card-v10{
+    min-height:182px;
+    border-radius:20px;
+  }
+  .premium-team .sticker-card-v10 .sticker-face{
+    grid-template-rows:68px 1fr 52px 26px;
+    padding:8px 8px 6px;
   }
   .premium-team .sticker-plate-top{
-    min-height:80px;
+    height:68px;
+    border-radius:18px 28px 18px 18px;
   }
   .premium-team .sticker-plate-bottom{
-    min-height:70px;
+    height:52px;
+    border-radius:16px 16px 22px 22px;
+  }
+  .premium-team .sticker-code{
+    font-size:12px;
+    letter-spacing:.16em;
+  }
+  .premium-team .sticker-number{
+    font-size:22px;
   }
   .premium-team .sticker-name{
-    min-height:2.6em;
+    font-size:10px!important;
+    line-height:1.08!important;
+  }
+  .premium-team .sticker-status{
+    min-height:24px;
+    font-size:9px!important;
   }
 }
-@media (max-width: 420px){
-  .premium-team .sticker-plate-top{
-    min-height:76px;
+@media (max-width:420px){
+  .premium-team .section-visual.team-banner{
+    min-height:112px;
+    padding:10px;
+    column-gap:10px;
   }
-  .premium-team .sticker-plate-bottom{
-    min-height:68px;
+  .premium-team .team-banner .banner-copy{
+    padding-right:64px;
+  }
+  .premium-team .team-banner .banner-top-row{
+    gap:8px;
+  }
+  .premium-team .team-banner .banner-count{
+    min-width:60px;
+    padding:6px 8px;
+    font-size:13px;
+  }
+  .premium-team .team-banner .banner-title-row h3{
+    font-size:17px;
+  }
+  .premium-team .team-banner .banner-subline{
+    font-size:12px;
+  }
+  .premium-team .team-banner .banner-stats span{
+    min-height:26px;
+    padding:4px 9px;
+    font-size:10px;
+  }
+  .premium-team .sticker-grid{
+    gap:7px;
+    padding:0 10px 10px;
+  }
+  .premium-team .sticker-card-v10 .sticker-face{
+    grid-template-rows:68px 1fr 52px 26px;
   }
 }

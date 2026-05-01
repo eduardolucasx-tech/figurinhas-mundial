@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.11.3-banner-balance-sticker-center';
+const THEME_VERSION = '0.11.0-merge-local-cloud';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -193,23 +193,25 @@ function bannerThemeStyle(code){
     `--banner-ball:${t.ball || t.bg1 || '#0b234a'}`
   ].join(';');
 }
-function sectionVisual(sec){
-  return `<div class="section-visual" style="${bannerThemeStyle(sec.code)}"><span class="flag-badge" aria-hidden="true">${flagOf(sec.code)}</span><span class="visual-ball">⚽</span><i></i><b></b></div>`;
-}
-function teamBanner(sec, st){
+function sectionVisual(sec, st){
+  const groupLabel = sec.group === 'EXTRAS' ? 'Extras' : `Grupo ${sec.group}`;
+  const totalLabel = `${st.owned}/${st.total}`;
+  const physicalLabel = `${st.physical} ${st.physical === 1 ? 'física' : 'físicas'}`;
   return `<div class="section-visual team-banner" style="${bannerThemeStyle(sec.code)}">
     <span class="flag-badge" aria-hidden="true">${flagOf(sec.code)}</span>
-    <div class="team-banner-content">
-      <div class="team-banner-topline">
-        <span class="badge">${sec.group === 'EXTRAS' ? 'Extras' : `Grupo ${sec.group}`}</span>
-        <strong class="team-banner-count">${st.owned}/${st.total}</strong>
+    <div class="banner-copy">
+      <div class="banner-top-row">
+        <span class="badge banner-group">${groupLabel}</span>
+        <strong class="banner-count">${totalLabel}</strong>
       </div>
-      <div class="team-banner-title">${codeOf(sec)} · ${sec.name}</div>
-      <div class="team-banner-meta">${pct(st.progress)} completo</div>
-      <div class="team-banner-stats">
+      <div class="banner-title-row">
+        <h3>${escapeHtml(codeOf(sec))} · ${escapeHtml(sec.name)}</h3>
+      </div>
+      <div class="banner-subline">${totalLabel} figurinhas · ${pct(st.progress)}</div>
+      <div class="banner-stats">
         <span>${st.missing} faltam</span>
         <span>${st.duplicates} repetidas</span>
-        <span>${st.physical} físicas</span>
+        <span>${physicalLabel}</span>
       </div>
     </div>
     <span class="visual-ball">⚽</span>
@@ -518,7 +520,7 @@ function renderDashboard(){
 function renderAlbum(){
   const groups = [...new Set(window.ALBUM_DATA.teams.map(t => t.group))];
   const s = stats();
-  const totalFigurinhas = Number(albumItems.length || s.total || 994);
+  const totalFigurinhas = Number(window.ALBUM_DATA.total || s.total || 994);
   const tenhoFigurinhas = Number.isFinite(Number(s.owned)) ? Number(s.owned) : 0;
   const faltantesFigurinhas = Number.isFinite(Number(s.missing)) ? Number(s.missing) : Math.max(0, totalFigurinhas - tenhoFigurinhas);
   const repetidasFigurinhas = Number.isFinite(Number(s.duplicates)) ? Number(s.duplicates) : 0;
@@ -581,7 +583,7 @@ function renderTeamList(){
     const st = sectionStats(sec);
     return `<article class="team-card album-team premium-team ${st.progress === 1 ? 'complete' : ''} ${st.progress >= .75 ? 'almost' : st.progress <= .25 ? 'low' : 'mid'}">
       <div class="premium-team-top">
-        ${teamBanner(sec, st)}
+        ${sectionVisual(sec, st)}
       </div>
       ${st.progress === 1 ? '<div class="complete-ribbon">Completa</div>' : ''}
       <div class="sticker-grid">${items.map(stickerButton).join('')}</div>
@@ -604,7 +606,7 @@ function stickerButton(item){
   const showMeta = item.type && item.type !== 'jogador';
   const rarityClass = item.number === 1 ? 'rarity-silver' : item.number === 13 ? 'rarity-gold' : 'rarity-base';
   const stateClass = q > 1 ? 'state-duplicate' : q === 1 ? 'state-owned' : 'state-missing';
-  const cornerText = q > 1 ? `x${q}` : q === 1 ? '✓' : '';
+  const cornerText = '';
   const statusText = q > 1 ? `Rep. +${q-1}` : (q === 1 ? 'Tenho' : 'Falta');
   return `<div class="sticker sticker-card-v10 ${rarityClass} ${stateClass} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
     <button class="sticker-main sticker-face" data-open="${item.id}">
