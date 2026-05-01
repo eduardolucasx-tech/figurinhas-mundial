@@ -638,3 +638,231 @@ body:before{
   }
   .sticker-name{font-size:9px !important;}
 }
+
+
+/* v0.10.6 — figurinhas no estilo logo Copa 2026 + foco mobile */
+.sticker-card-v10{
+  position:relative;
+  border-radius:20px !important;
+  background:linear-gradient(180deg,#c8cbcd 0%, #b7bbbe 58%, #9ea3a8 100%) !important;
+  border:1px solid rgba(90,96,102,.18) !important;
+  box-shadow:0 10px 20px rgba(8,18,48,.08), inset 0 1px 0 rgba(255,255,255,.34) !important;
+  overflow:hidden;
+}
+.sticker-card-v10:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(8,18,48,.12), inset 0 1px 0 rgba(255,255,255,.34) !important}
+.sticker-card-v10.rarity-base{
+  background:linear-gradient(180deg,#cfd2d4 0%,#bcc0c3 58%,#a7acb0 100%) !important;
+}
+.sticker-card-v10.rarity-silver{
+  background:linear-gradient(180deg,#eceff3 0%,#d9dde2 42%,#bcc4cc 100%) !important;
+}
+.sticker-card-v10.rarity-gold{
+  background:linear-gradient(180deg,#f4e9b7 0%,#e7d48d 45%,#d7bb5b 100%) !important;
+}
+.sticker-card-v10 .sticker-face{
+  background:transparent !important;
+  padding:10px 9px 7px !important;
+  gap:9px !important;
+  grid-template-rows:minmax(72px,1fr) minmax(56px,auto) auto !important;
+}
+.sticker-card-v10 .sticker-face:before,
+.sticker-card-v10 .sticker-face:after,
+.sticker-card-v10:before{
+  display:none !important;
+}
+.sticker-plate{
+  background:#f6f6f6 !important;
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+}
+.sticker-plate-top{
+  position:relative;
+  min-height:72px !important;
+  border-radius:18px 40px 18px 18px !important;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:10px 10px 9px !important;
+  overflow:hidden;
+}
+.sticker-plate-top::after{
+  content:'';
+  position:absolute;
+  right:-2px;
+  bottom:-2px;
+  width:42%;
+  height:54%;
+  background:inherit;
+  clip-path:polygon(100% 0,100% 100%,0 100%);
+  box-shadow:-1px -1px 0 rgba(255,255,255,.45);
+}
+.sticker-plate-top > *{position:relative;z-index:1}
+.sticker-plate-bottom{
+  position:relative;
+  min-height:56px !important;
+  border-radius:18px 34px 18px 18px !important;
+  padding:9px 8px 8px !important;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  overflow:hidden;
+}
+.sticker-plate-bottom::after{
+  content:'';
+  position:absolute;
+  left:-1px;
+  top:-1px;
+  width:26%;
+  height:42%;
+  background:rgba(0,0,0,.02);
+  clip-path:polygon(0 0,100% 0,0 100%);
+}
+.sticker-code{
+  color:#7f8389 !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:.18em !important;
+  text-transform:uppercase;
+}
+.sticker-number{
+  color:#787d83 !important;
+  font-size:20px !important;
+  line-height:1 !important;
+  font-weight:800 !important;
+  margin-top:4px;
+}
+.sticker-name{
+  color:#85898f !important;
+  font-size:10px !important;
+  line-height:1.08 !important;
+  font-weight:900 !important;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  text-wrap:balance;
+  max-width:100%;
+}
+.sticker-meta{
+  margin-top:4px;
+  color:#a0a4aa !important;
+  font-size:7px !important;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.sticker-status{
+  width:100%;
+  min-height:24px !important;
+  padding:4px 10px !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.92) !important;
+  color:#8c9197 !important;
+  border:1px solid rgba(155,160,166,.18);
+  font-size:8px !important;
+  font-weight:900 !important;
+  letter-spacing:.05em;
+}
+.sticker-card-v10 .qty-row{
+  min-height:36px !important;
+  padding:4px 6px !important;
+  grid-template-columns:28px 1fr 28px !important;
+  gap:6px !important;
+  background:rgba(100,106,113,.92) !important;
+  border-top:1px solid rgba(255,255,255,.18);
+}
+.sticker-card-v10 .qty-row b{
+  color:#fff !important;
+  font-size:12px;
+}
+.sticker-card-v10 .qty-btn{
+  width:28px;
+  height:28px;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.18) !important;
+  color:#fff !important;
+  font-size:20px !important;
+  line-height:1 !important;
+}
+.sticker-card-v10 .qty-btn:hover{background:rgba(255,255,255,.28) !important}
+.sticker-card-v10.state-owned{
+  box-shadow:0 10px 20px rgba(8,18,48,.08), inset 0 0 0 2px rgba(39,149,89,.22) !important;
+}
+.sticker-card-v10.state-owned .qty-row{
+  background:linear-gradient(180deg,#53956c 0%, #3e7a56 100%) !important;
+}
+.sticker-card-v10.state-owned .sticker-status{
+  color:#2f734d !important;
+  background:#eff9f2 !important;
+}
+.sticker-card-v10.state-duplicate{
+  box-shadow:0 12px 22px rgba(150,107,0,.12), inset 0 0 0 2px rgba(227,170,20,.30) !important;
+}
+.sticker-card-v10.state-duplicate .qty-row{
+  background:linear-gradient(180deg,#e4aa14 0%, #c98f09 100%) !important;
+}
+.sticker-card-v10.state-duplicate .sticker-status{
+  color:#9b6500 !important;
+  background:#fff5d6 !important;
+}
+.sticker-card-v10.rarity-silver .sticker-code,
+.sticker-card-v10.rarity-silver .sticker-number,
+.sticker-card-v10.rarity-silver .sticker-name{color:#7e8690 !important}
+.sticker-card-v10.rarity-gold .sticker-code,
+.sticker-card-v10.rarity-gold .sticker-number,
+.sticker-card-v10.rarity-gold .sticker-name{color:#73611f !important}
+.sticker-card-v10.rarity-gold .sticker-meta{color:#9f8730 !important}
+
+/* grid mais parecida com a referência no mobile */
+@media (max-width:760px){
+  .sticker-grid-map,
+  .team-card .team-stickers,
+  .selection-stickers,
+  .album-stickers-grid{
+    grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+    gap:10px !important;
+  }
+  .sticker-card-v10{
+    border-radius:18px !important;
+  }
+  .sticker-card-v10 .sticker-face{
+    padding:8px 7px 6px !important;
+    gap:8px !important;
+    grid-template-rows:minmax(64px,1fr) minmax(50px,auto) auto !important;
+  }
+  .sticker-plate-top{
+    min-height:64px !important;
+    border-radius:16px 34px 16px 16px !important;
+    padding:8px 8px 7px !important;
+  }
+  .sticker-plate-bottom{
+    min-height:50px !important;
+    border-radius:16px 30px 16px 16px !important;
+    padding:7px 7px !important;
+  }
+  .sticker-code{font-size:10px !important;letter-spacing:.16em !important;}
+  .sticker-number{font-size:18px !important;}
+  .sticker-name{font-size:9px !important;}
+  .sticker-meta{font-size:6px !important;}
+  .sticker-status{font-size:7px !important; min-height:22px !important; padding:3px 8px !important;}
+  .sticker-card-v10 .qty-row{min-height:34px !important; grid-template-columns:26px 1fr 26px !important; gap:4px !important;}
+  .sticker-card-v10 .qty-btn{width:26px;height:26px;font-size:18px !important;}
+}
+@media (max-width:420px){
+  .sticker-grid-map,
+  .team-card .team-stickers,
+  .selection-stickers,
+  .album-stickers-grid{
+    gap:8px !important;
+  }
+  .sticker-card-v10 .sticker-face{
+    padding:7px 6px 6px !important;
+    grid-template-rows:minmax(58px,1fr) minmax(46px,auto) auto !important;
+  }
+  .sticker-plate-top{min-height:58px !important;}
+  .sticker-plate-bottom{min-height:46px !important;}
+  .sticker-code{font-size:9px !important;}
+  .sticker-number{font-size:17px !important;}
+  .sticker-name{font-size:8px !important;}
+}
