@@ -1,6 +1,6 @@
 window.ALBUM_DATA = {
   appName: 'Meu Álbum da Copa',
-  version: '0.10.1-nomes-completos',
+  version: '0.10.8-alinhamento-desktop-mobile',
   total: 994,
   // Ordem de layout ajustada: seleções na ordem do álbum e, ao final, 00 + FWC 01–19 antes da Coca-Cola.
   teams: [

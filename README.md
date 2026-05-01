@@ -18,16 +18,3 @@ Atualização visual focada no layout das figurinhas.
 ## Deploy
 
 Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel publicar e teste com Ctrl + F5.
-
-
-## v0.10.5
-- Correção do layout interno das figurinhas no mobile e desktop.
-- Prevenção de textos vazando das bordas.
-- Status resumido de repetidas para evitar overflow.
-- Mantidas figurinha 1 em prata e figurinha 13 em dourado.
-
-
-## v0.10.6
-- Visual das figurinhas reformulado no estilo inspirado no logo da Copa 2026.
-- Mobile ajustado para ficar mais próximo da referência enviada.
-- Mantidas regras: figurinha 1 prata, figurinha 13 dourada e restante cinza.
