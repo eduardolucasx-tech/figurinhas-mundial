@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.9.2-sync-familia-bidirecional';
+const THEME_VERSION = '0.10.1-nomes-completos';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -22,16 +22,21 @@ const albumItems = (() => {
 
     return Array.from({length: count}, (_, i) => {
       const number = start + i;
+      const id = `${section.code}-${String(number).padStart(2, '0')}`;
+      const ref = refOf(section, number);
+      const aliases = [id, ref.replace(' ', '-'), `${codeOf(section)}-${String(number).padStart(2, '0')}`];
+      const meta = aliases.map(k => (window.STICKER_META || {})[k]).find(Boolean) || {};
+      const defaultType = isTeam ? (i === 0 ? 'escudo' : i === 12 ? 'especial' : 'jogador') : (section.code === 'ZERO' ? 'especial' : section.code === 'COC' ? 'coca-cola' : 'history');
       return {
-        id: `${section.code}-${String(number).padStart(2, '0')}`,
+        id,
         code: section.code,
         number,
-        ref: refOf(section, number),
+        ref,
         group: section.group,
         section: section.name,
         sectionKey,
-        name: '',
-        type: isTeam ? (i === 0 ? 'Escudo/seleção' : i === 12 ? 'Especial da seleção' : 'Figurinha') : (section.code === 'ZERO' ? 'Figurinha 00' : 'Extra'),
+        name: meta.name || '',
+        type: meta.type || defaultType,
         order: sectionIndex * 100 + i + 1
       };
     });
@@ -218,6 +223,7 @@ function statusLabel(item){
 function statusClass(item){ return statusOf(item); }
 function pct(n){ return `${Math.round((n || 0) * 100)}%`; }
 function escapeAttr(s){ return String(s).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function escapeHtml(s){ return String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
 function csv(v){ return `"${String(v).replaceAll('"','""')}"`; }
 function nowText(){ return new Date().toLocaleString('pt-BR'); }
 
@@ -424,14 +430,14 @@ function renderAlbum(){
     <div class="album-hero album-hero-compact album-hero-total premium-hero" aria-label="Resumo do álbum">
       <div class="album-hero-main">
         <span class="label">Meu álbum da Copa</span>
-        <h3>${tenhoFigurinhas}/${totalFigurinhas} figurinhas</h3>
-        <p class="hero-subline">Coleção 2026 · USA • México • Canadá</p>
+        <h3>${tenhoFigurinhas}/${totalFigurinhas} únicas</h3>
+        <p class="hero-subline">Total real = tenho + repetidas. ${acervoFisico} figurinhas no acervo.</p>
       </div>
       <div class="album-hero-status summary-only">
         <span><b>${pct(progressoAlbum)}</b> completo</span>
         <span><b>${faltantesFigurinhas}</b> faltantes</span>
         <span><b>${repetidasFigurinhas}</b> repetidas</span>
-        <span><b>${acervoFisico}</b> no acervo físico</span>
+        <span><b>${acervoFisico}</b> total de figurinhas</span>
       </div>
     </div>
     <div class="filters album-filters">
@@ -498,10 +504,21 @@ function matchItem(item, q, status){
 function stickerButton(item){
   const q = quantity(item.id);
   const st = statusLabel(item);
-  return `<div class="sticker ${statusClass(item)}" title="${item.ref} · ${st}">
-    <button class="sticker-main" data-open="${item.id}"><strong>${item.ref}</strong><span>${q > 1 ? `x${q} · +${q-1}` : st}</span></button>
+  const displayName = item.name || item.section;
+  const typeLabel = stickerTypeLabel(item.type);
+  return `<div class="sticker sticker-card-v10 ${statusClass(item)} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
+    <button class="sticker-main sticker-face" data-open="${item.id}">
+      <span class="sticker-code">${escapeHtml(item.ref)}</span>
+      <strong class="sticker-name">${escapeHtml(displayName)}</strong>
+      <span class="sticker-meta">${escapeHtml(typeLabel)}</span>
+      <span class="sticker-status ${statusClass(item)}">${q > 1 ? `x${q} · +${q-1} repetida${q-1 > 1 ? 's' : ''}` : st}</span>
+    </button>
     <div class="qty-row"><button class="qty-btn dec" data-dec="${item.id}" aria-label="Remover">−</button><b>${q}</b><button class="qty-btn inc" data-inc="${item.id}" aria-label="Adicionar">+</button></div>
   </div>`;
+}
+function stickerTypeLabel(type){
+  const labels = { jogador:'Jogador', escudo:'Escudo', especial:'Especial', history:'História', 'coca-cola':'Extra', figurinha:'Figurinha' };
+  return labels[type] || type || 'Figurinha';
 }
 function bindQuantityControls(ctx=document){
   $$('[data-inc]', ctx).forEach(b => b.addEventListener('click', () => { addQuantity(b.dataset.inc, 1); animateQtyButton(b); }));
@@ -529,7 +546,7 @@ function formatList(filter, mode='default'){
     const key = sec.sectionKey || sec.code;
     const items = albumItems.filter(i => (i.sectionKey || i.code) === key && filter(i));
     if (items.length) {
-      const list = items.map(i => { const n = i.number === 0 ? '00' : String(i.number).padStart(2,'0'); return mode === 'dup' ? `${n} (+${extrasOf(i)} / x${quantity(i.id)})` : n; }).join(', ');
+      const list = items.map(i => { const n = i.number === 0 ? '00' : String(i.number).padStart(2,'0'); return mode === 'dup' ? `${n} · ${i.name || i.section} (+${extrasOf(i)} / x${quantity(i.id)})` : `${n} · ${i.name || i.section}`; }).join(', ');
       rows.push(`${codeOf(sec)} · ${sec.name}: ${list}`);
     }
   });
@@ -548,7 +565,7 @@ function renderTrades(){
   const rows = albumItems.filter(i => quantity(i.id) > 1 || state.tradeStatus[i.id]).sort((a,b)=>a.order-b.order);
   const dupText = formatList(i => quantity(i.id) > 1, 'dup');
   const missingText = formatList(i => quantity(i.id) === 0);
-  $('#trocas').innerHTML = `<div class="grid panel-grid"><div class="card"><span class="label">Resumo para WhatsApp</span><p class="muted">Use para trocar com amigos.</p><div class="button-row"><button class="primary" id="copyTradeText">Copiar repetidas</button><button class="ghost" id="copyNeedText">Copiar faltantes</button></div></div><div class="card"><span class="label">Repetidas disponíveis</span><h3>${stats().duplicates}</h3><p>Total de figurinhas extras no acervo.</p></div></div><div class="table-wrap"><table><thead><tr><th>Figurinha</th><th>Seleção/seção</th><th>Qtd</th><th>Repetidas</th><th>Status troca</th><th>Contato</th><th>Obs.</th></tr></thead><tbody>${rows.map(i => `<tr><td><strong>${i.ref}</strong></td><td>${i.section}</td><td><input type="number" min="0" value="${quantity(i.id)}" data-q="${i.id}" style="width:82px"></td><td>${extrasOf(i)}</td><td><select data-trade="${i.id}"><option></option>${['Disponível','Reservada','Trocada','Aguardando'].map(v=>`<option ${state.tradeStatus[i.id]===v?'selected':''}>${v}</option>`).join('')}</select></td><td><input value="${escapeAttr(state.contacts[i.id]||'')}" data-contact="${i.id}" placeholder="Nome/WhatsApp"></td><td><input value="${escapeAttr(state.notes[i.id]||'')}" data-note="${i.id}" placeholder="Observação"></td></tr>`).join('') || `<tr><td colspan="7" class="empty">Quando marcar repetidas, elas aparecem aqui.</td></tr>`}</tbody></table></div>`;
+  $('#trocas').innerHTML = `<div class="grid panel-grid"><div class="card"><span class="label">Resumo para WhatsApp</span><p class="muted">Use para trocar com amigos.</p><div class="button-row"><button class="primary" id="copyTradeText">Copiar repetidas</button><button class="ghost" id="copyNeedText">Copiar faltantes</button></div></div><div class="card"><span class="label">Repetidas disponíveis</span><h3>${stats().duplicates}</h3><p>Total de figurinhas extras no acervo.</p></div></div><div class="table-wrap"><table><thead><tr><th>Figurinha</th><th>Seleção/seção</th><th>Qtd</th><th>Repetidas</th><th>Status troca</th><th>Contato</th><th>Obs.</th></tr></thead><tbody>${rows.map(i => `<tr><td><strong>${i.ref}</strong><br><span class="muted">${escapeHtml(i.name || '')}</span></td><td>${i.section}</td><td><input type="number" min="0" value="${quantity(i.id)}" data-q="${i.id}" style="width:82px"></td><td>${extrasOf(i)}</td><td><select data-trade="${i.id}"><option></option>${['Disponível','Reservada','Trocada','Aguardando'].map(v=>`<option ${state.tradeStatus[i.id]===v?'selected':''}>${v}</option>`).join('')}</select></td><td><input value="${escapeAttr(state.contacts[i.id]||'')}" data-contact="${i.id}" placeholder="Nome/WhatsApp"></td><td><input value="${escapeAttr(state.notes[i.id]||'')}" data-note="${i.id}" placeholder="Observação"></td></tr>`).join('') || `<tr><td colspan="7" class="empty">Quando marcar repetidas, elas aparecem aqui.</td></tr>`}</tbody></table></div>`;
   $$('[data-q]').forEach(el => el.addEventListener('change', () => setQuantity(el.dataset.q, el.value, `${itemById(el.dataset.q).ref} ajustada`)));
   $$('[data-trade]').forEach(el => el.addEventListener('change', () => { state.tradeStatus[el.dataset.trade] = el.value; saveState(); toast('Troca atualizada.'); render(); }));
   $$('[data-contact]').forEach(el => el.addEventListener('change', () => { state.contacts[el.dataset.contact] = el.value; saveState(); }));
@@ -957,7 +974,7 @@ function addFromAdicionar(id, delta=1){
   if (!item) return;
   addQuantity(id, delta);
   if (delta > 0) {
-    packSession = [{ id, ref:item.ref, section:item.section, at:new Date().toISOString() }, ...packSession].slice(0, 30);
+    packSession = [{ id, ref:item.ref, section:item.section, name:item.name || '', at:new Date().toISOString() }, ...packSession].slice(0, 30);
   }
   renderAdicionarResults();
   renderPackSession();
@@ -970,7 +987,7 @@ function renderAdicionar(){
       <div class="card add-hero-card premium-add-card">
         <span class="label">Modo pacotinho</span>
         <h3>Adicionar figurinhas</h3>
-        <p>Digite o código do verso da figurinha. Aceita formatos como <strong>HAI 8</strong>, <strong>HAI08</strong>, <strong>FWC 1</strong>, <strong>COC 1</strong> ou <strong>00</strong>. Depois é só confirmar com <strong>+1</strong>.</p>
+        <p>Digite o código do verso da figurinha. Aceita formatos como <strong>HAI 8</strong>, <strong>HAI08</strong>, <strong>FWC 1</strong>, <strong>COC 1</strong> . Depois é só confirmar com <strong>+1</strong>.</p>
         <div class="add-input-row">
           <input id="addCodeInput" type="search" inputmode="text" autocomplete="off" placeholder="Digite o código: HAI 8" />
           <button class="primary" id="addFindBtn">Buscar</button>
@@ -1028,14 +1045,14 @@ function renderAdicionarResults(){
     return;
   }
   if (!candidates.length) {
-    box.innerHTML = `<div class="empty add-empty">Não encontrei esse código. Confira se está no formato <strong>3 letras + número</strong>, tipo HAI 8, FWC 1, COC 1 ou 00.</div>`;
+    box.innerHTML = `<div class="empty add-empty">Não encontrei esse código. Confira se está no formato <strong>3 letras + número</strong>, tipo HAI 8, FWC 1, CC 1 ou COC 1.</div>`;
     return;
   }
   box.innerHTML = candidates.map(i => `
     <div class="result-item add-result ${statusClass(i)}">
       <div>
-        <strong><span class="team-flag" aria-hidden="true">${flagOf(i.code)}</span>${i.ref}</strong><br>
-        <span class="muted">${i.section} · ${statusLabel(i)} · qtd ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span>
+        <strong><span class="team-flag" aria-hidden="true">${flagOf(i.code)}</span>${i.ref} · ${escapeHtml(i.name || i.section)}</strong><br>
+        <span class="muted">${i.section} · ${stickerTypeLabel(i.type)} · ${statusLabel(i)} · qtd ${quantity(i.id)}${extrasOf(i) ? ` · +${extrasOf(i)} repetidas` : ''}</span>
       </div>
       <div class="qty-inline">
         <button type="button" class="qty-btn dec" data-add-dec="${i.id}">−</button>
@@ -1055,7 +1072,7 @@ function renderPackSession(){
     box.innerHTML = `<div class="empty add-empty">Nada lançado neste pacotinho ainda.</div>`;
     return;
   }
-  box.innerHTML = packSession.map(p => `<div class="pack-row"><strong>${p.ref}</strong><span>${p.section}</span><em>+1</em></div>`).join('');
+  box.innerHTML = packSession.map(p => `<div class="pack-row"><strong>${p.ref}</strong><span>${escapeHtml(p.name || p.section)}</span><em>+1</em></div>`).join('');
 }
 
 

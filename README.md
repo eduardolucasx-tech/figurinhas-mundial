@@ -1,32 +1,21 @@
-# Checklist Mundial v0.6
+# Meu Álbum da Copa v0.10.1
 
-App/PWA para controlar álbum de figurinhas com login Google e sincronização via Firebase/Firestore.
+PWA para controlar álbum de figurinhas com login Google, sincronização pessoal/família e controle por quantidade.
 
-## Novidades da v0.6
+## Novidades da v0.10.1
 
-- Remove completamente a experiência de câmera/scanner por enquanto.
-- Mantém o app abrindo direto na aba **Álbum**.
-- Adiciona a aba **Adicionar**, focada em lançamento rápido por código.
-- Modo pacotinho: digite códigos como `HAI 8`, `HAI08` ou `HAI-08` e confirme com **+1**.
-- Lista temporária de últimas figurinhas adicionadas no pacotinho.
-- Mantém quantidades ilimitadas por figurinha.
-- Repetidas continuam sendo calculadas como quantidade acima de 1.
-- Mantém sincronização automática por padrão.
-- Mantém controle direto pelo álbum com botões **+** e **-**.
-- Mantém Buscar, Trocas, Mapa, Resumo e Conta.
+- Base completa de nomes e tipos importada de `NOMES E TAGS.txt`.
+- Total oficial mantido em **994 figurinhas**:
+  - 48 seleções x 20 = 960
+  - FWC 01–20 = 20
+  - CC 01–14 = 14
+- Cards mostram código, nome, tipo e status.
+- Busca encontra por código, seleção, nome, tipo e status.
+- Resumo corrigido:
+  - `x/994` mostra apenas as figurinhas únicas que você tem.
+  - `Total de figurinhas` mostra o acervo físico real: únicas + repetidas.
+- Mantém sync automático, modo família bidirecional, quantidades ilimitadas e repetidas como `quantidade - 1`.
 
 ## Deploy
 
-Suba os arquivos na branch `main` do GitHub. A Vercel publica automaticamente.
-
-## Firebase
-
-A configuração fica em `firebase-config.js`. A segurança fica nas regras do Firestore.
-
-## v0.7.1 - limpeza visual
-
-- Remove botões duplicados do topo e do card principal do Álbum.
-- Mantém apenas status de modo/sync e o botão Sincronizar agora no topo.
-- Move a instalação do app para a aba Conta.
-- Mantém os filtros do Álbum como principal forma de navegação.
-- Adiciona acesso ao Mapa como opção de visualização dentro do Álbum.
+Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel publicar e teste com Ctrl + F5 se o visual antigo aparecer.
