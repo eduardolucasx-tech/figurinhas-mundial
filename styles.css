@@ -475,3 +475,166 @@ body:before{
   background:linear-gradient(135deg,rgba(245,199,82,.32),rgba(255,255,255,.18));
   border-color:rgba(245,199,82,.60);
 }
+
+
+/* v0.10.5 — correção estrutural do layout das figurinhas */
+.sticker-card-v10{
+  min-height:0;
+  display:grid;
+  grid-template-rows:1fr auto;
+}
+.sticker-card-v10 .sticker-face{
+  display:grid !important;
+  grid-template-rows:minmax(70px,1fr) minmax(58px,auto) auto;
+  align-content:start;
+  align-items:stretch;
+  justify-items:stretch;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  box-sizing:border-box;
+  gap:8px;
+}
+.sticker-card-v10 .sticker-face,
+.sticker-plate,
+.sticker-plate-top,
+.sticker-plate-bottom,
+.sticker-status,
+.sticker-name,
+.sticker-code,
+.sticker-number,
+.sticker-meta,
+.sticker-card-v10 .qty-row,
+.sticker-card-v10 .qty-row > *{
+  box-sizing:border-box;
+  min-width:0;
+}
+.sticker-plate,
+.sticker-plate-top,
+.sticker-plate-bottom{
+  width:100%;
+  max-width:100%;
+}
+.sticker-plate-top{
+  min-height:78px;
+  margin:0;
+}
+.sticker-plate-bottom{
+  min-height:58px;
+  margin-top:0;
+  padding-inline:8px;
+}
+.sticker-code{
+  display:block;
+  max-width:100%;
+}
+.sticker-number{
+  display:block;
+  max-width:100%;
+}
+.sticker-name{
+  width:100%;
+  max-width:100%;
+  min-height:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  hyphens:auto;
+  padding:0 2px;
+}
+.sticker-meta{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.sticker-status{
+  position:static;
+  left:auto;
+  right:auto;
+  bottom:auto;
+  width:100%;
+  max-width:100%;
+  min-height:24px;
+  margin-top:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px 8px;
+  line-height:1.05;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.sticker-corner{
+  z-index:3;
+}
+.sticker-card-v10 .qty-row{
+  min-height:38px;
+  grid-template-columns:30px 1fr 30px;
+  gap:6px;
+  padding:5px 6px;
+}
+.sticker-card-v10 .qty-row b{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.sticker-card-v10 .qty-btn{
+  display:grid;
+  place-items:center;
+  min-width:0;
+}
+@media (min-width:761px){
+  .sticker-card-v10{
+    min-height:222px;
+  }
+}
+@media (max-width:760px){
+  .sticker-card-v10{
+    min-height:198px;
+  }
+  .sticker-card-v10 .sticker-face{
+    grid-template-rows:minmax(68px,1fr) minmax(54px,auto) auto;
+  }
+  .sticker-plate-top{
+    min-height:72px;
+  }
+  .sticker-plate-bottom{
+    min-height:54px;
+  }
+}
+@media (max-width:520px){
+  .sticker-card-v10{
+    min-height:188px;
+  }
+  .sticker-card-v10 .sticker-face{
+    padding:8px 8px 6px;
+    gap:7px;
+    grid-template-rows:minmax(64px,1fr) minmax(50px,auto) auto;
+  }
+  .sticker-plate-top{
+    min-height:66px;
+    padding:8px 8px 7px;
+  }
+  .sticker-plate-bottom{
+    min-height:50px;
+    padding:7px 7px;
+  }
+  .sticker-code{font-size:11px;letter-spacing:.13em;}
+  .sticker-number{font-size:20px;}
+  .sticker-name{font-size:10px !important;line-height:1.05 !important;}
+  .sticker-meta{font-size:7px !important;}
+  .sticker-status{font-size:8px !important;padding:4px 6px;min-height:22px;}
+  .sticker-card-v10 .qty-row{grid-template-columns:28px 1fr 28px;min-height:36px;padding:4px 5px;gap:5px;}
+}
+@media (max-width:380px){
+  .sticker-card-v10{
+    min-height:182px;
+  }
+  .sticker-card-v10 .sticker-face{
+    grid-template-rows:minmax(60px,1fr) minmax(48px,auto) auto;
+  }
+  .sticker-name{font-size:9px !important;}
+}

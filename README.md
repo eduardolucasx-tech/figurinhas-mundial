@@ -18,3 +18,10 @@ Atualização visual focada no layout das figurinhas.
 ## Deploy
 
 Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel publicar e teste com Ctrl + F5.
+
+
+## v0.10.5
+- Correção do layout interno das figurinhas no mobile e desktop.
+- Prevenção de textos vazando das bordas.
+- Status resumido de repetidas para evitar overflow.
+- Mantidas figurinha 1 em prata e figurinha 13 em dourado.
