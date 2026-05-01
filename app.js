@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.10.2-contraste-e-legado';
+const THEME_VERSION = '0.10.4-status-prata-dourado';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -553,13 +553,22 @@ function stickerButton(item){
   const displayName = item.name || item.section;
   const typeLabel = stickerTypeLabel(item.type);
   const showMeta = item.type && item.type !== 'jogador';
-  const statusText = q > 1 ? `x${q} · +${q-1} rep.` : st;
-  return `<div class="sticker sticker-card-v10 ${statusClass(item)} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
+  const rarityClass = item.number === 1 ? 'rarity-silver' : item.number === 13 ? 'rarity-gold' : 'rarity-base';
+  const stateClass = q > 1 ? 'state-duplicate' : q === 1 ? 'state-owned' : 'state-missing';
+  const cornerText = q > 1 ? `x${q}` : q === 1 ? '✓' : '';
+  const statusText = q > 1 ? `+${q-1} repetida${q-1 > 1 ? 's' : ''}` : (q === 1 ? 'Tenho' : 'Falta');
+  return `<div class="sticker sticker-card-v10 ${rarityClass} ${stateClass} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
     <button class="sticker-main sticker-face" data-open="${item.id}">
-      <span class="sticker-code">${escapeHtml(item.ref)}</span>
-      <strong class="sticker-name">${escapeHtml(displayName)}</strong>
-      ${showMeta ? `<span class="sticker-meta">${escapeHtml(typeLabel)}</span>` : `<span class="sticker-meta sticker-meta-empty"></span>`}
-      <span class="sticker-status ${statusClass(item)}">${statusText}</span>
+      <span class="sticker-plate sticker-plate-top">
+        <span class="sticker-code">${escapeHtml(codeOf(item))}</span>
+        <span class="sticker-number">${escapeHtml(String(item.number))}</span>
+      </span>
+      <span class="sticker-plate sticker-plate-bottom">
+        <strong class="sticker-name">${escapeHtml(displayName)}</strong>
+        ${showMeta ? `<span class="sticker-meta">${escapeHtml(typeLabel)}</span>` : ''}
+      </span>
+      <span class="sticker-corner ${stateClass}">${cornerText}</span>
+      <span class="sticker-status ${stateClass}">${statusText}</span>
     </button>
     <div class="qty-row"><button class="qty-btn dec" data-dec="${item.id}" aria-label="Remover">−</button><b>${q}</b><button class="qty-btn inc" data-inc="${item.id}" aria-label="Adicionar">+</button></div>
   </div>`;
