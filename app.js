@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.11.4-stable-clean';
+const THEME_VERSION = '0.12.1-sticker-focus';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -55,7 +55,7 @@ function initialState(){
 }
 
 let state = loadState();
-let currentView = 'album';
+let currentView = 'dashboard';
 let deferredInstallPrompt = null;
 let autoSync = localStorage.getItem(AUTO_SYNC_KEY) !== '0';
 let syncUi = { status: 'local', label: 'Modo local', detail: 'Entre com Google para sincronizar.' };
@@ -66,14 +66,6 @@ let cloudUnsubscribe = null;
 let lastCloudWriteId = '';
 let undoSnapshot = null;
 let packSession = [];
-
-// Limpeza segura: não apaga coleção, apenas remove chaves antigas/transitórias que não são mais usadas.
-function cleanupLegacyRuntimeKeys(){
-  try {
-    ['checklist-mundial-state-v1','checklist-mundial-state-v0','meu-album-debug'].forEach(k => localStorage.removeItem(k));
-  } catch(e) {}
-}
-cleanupLegacyRuntimeKeys();
 
 
 const FLAGS = {
@@ -438,14 +430,16 @@ function setSync(status, label, detail = ''){
 }
 function updateChrome(){
   const s = stats();
-  $('#sideProgress').textContent = pct(s.progress);
-  $('#sideProgressBar').style.width = pct(s.progress);
+  const progressEl = $('#sideProgress');
+  if (progressEl) progressEl.textContent = `${pct(s.progress)} · ${s.owned}/${s.total}`;
+  const progressBar = $('#sideProgressBar');
+  if (progressBar) progressBar.style.width = pct(s.progress);
   const badge = $('#syncBadge');
   if (badge) { badge.className = `sync-badge ${syncUi.status}`; badge.textContent = syncUi.label; }
   const side = $('#sideSync');
   if (side) {
-    const mode = familyCode ? `Família ${familyCode}` : (cloud.user?.email || '');
-    side.textContent = cloud.user ? `${syncUi.label}${mode ? ` · ${mode}` : ''}` : syncUi.label;
+    const mode = familyCode ? `Família ${familyCode}` : (cloud.user?.email || 'Coleção local');
+    side.textContent = `${syncUi.detail || syncUi.label} · ${mode}`;
   }
 }
 function toast(message, undo = false){
@@ -461,7 +455,8 @@ function setView(view){
   currentView = view;
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   $$('.view').forEach(v => v.classList.toggle('active', v.id === view));
-  $('#viewTitle').textContent = ({album:'Álbum', adicionar:'Adicionar figurinhas', listas:'Listas rápidas', trocas:'Trocas', mapa:'Mapa visual', dashboard:'Resumo', config:'Conta'})[view];
+  const titles = {dashboard:'Início', album:'Álbum', adicionar:'Adicionar', listas:'Listas rápidas', trocas:'Trocas', mapa:'Mapa', config:'Conta'};
+  $('#viewTitle').textContent = titles[view] || 'Meu Álbum';
   render();
 }
 function render(){
@@ -482,45 +477,69 @@ function rankingList(rows){
 function renderDashboard(){
   const s = stats();
   const teamRanking = window.ALBUM_DATA.teams.map(t => ({...t, ...teamStats(t.code)})).sort((a,b) => b.progress - a.progress || a.missing - b.missing);
-  const recent = (state.history || []).slice(0, 8);
+  const recent = (state.history || []).slice(0, 6);
+  const highlights = albumItems.filter(i => quantity(i.id) === 0).slice(0, 8);
   $('#dashboard').innerHTML = `
-    <div class="grid kpi-grid">
-      ${kpi('Total do álbum', s.total)}
-      ${kpi('Tenho', s.owned, 'figurinhas únicas')}
-      ${kpi('Faltam', s.missing)}
-      ${kpi('Repetidas', s.duplicates, 'extras no acervo')}
-      ${kpi('Total físico', s.physical, 'inclui repetidas')}
-    </div>
-    <div class="grid panel-grid">
-      <div class="card hero-card">
-        <span class="label">Progresso geral</span>
-        <h3>${pct(s.progress)}</h3>
-        <div class="progress-track"><span class="progress-fill" style="width:${pct(s.progress)}"></span></div>
-        <p>${s.owned} figurinhas únicas marcadas de ${s.total}. ${s.completeTeams} seleções completas.</p>
-        <div class="hero-actions"><button class="hero-btn" data-go="album">Ver álbum</button><button class="hero-btn" id="dashQuick">Marcar figurinha</button><button class="hero-btn" data-go="trocas">Trocas</button></div>
+    <div class="hero-shell">
+      <div class="hero-cover">
+        <div>
+          <span class="label">Meu Álbum da Copa 2026</span>
+          <h2>${pct(s.progress)} completo</h2>
+          <p>${s.owned} figurinhas únicas de ${s.total} já coladas. Você tem ${s.duplicates} repetidas no acervo e ${s.completeTeams} seleções completas.</p>
+        </div>
+        <div class="hero-ring">
+          <div>
+            <strong>${pct(s.progress)}</strong>
+            <span>progresso</span>
+          </div>
+        </div>
       </div>
-      <div class="card status-card">
-        <span class="label">Sincronização</span>
-        <h3>${syncUi.label}</h3>
-        <p>${syncUi.detail || (cloud.user ? 'Alterações são salvas automaticamente na nuvem.' : 'Entre com Google para salvar em vários aparelhos.')}</p>
-        <div class="button-row"><button class="primary" id="dashSync">Sincronizar agora</button><button class="ghost" data-go="config">Conta & Sync</button></div>
+      <div class="grid kpi-grid">
+        ${kpi('Tenho', s.owned, 'figurinhas únicas')}
+        ${kpi('Faltam', s.missing, 'para fechar o álbum')}
+        ${kpi('Repetidas', s.duplicates, 'disponíveis para troca')}
+        ${kpi('Total físico', s.physical, 'inclui repetidas')}
       </div>
     </div>
+
+    <div class="card">
+      <span class="label">Ações rápidas</span>
+      <div class="quick-actions-grid">
+        <button class="action-tile" data-go="album">Ver álbum</button>
+        <button class="action-tile" id="dashQuick">Marcar figurinha</button>
+        <button class="action-tile" data-go="trocas">Abrir trocas</button>
+        <button class="action-tile" data-go="config">Conta & sync</button>
+      </div>
+    </div>
+
     <div class="grid panel-grid">
       <div class="card">
-        <span class="label">Mais completas</span>
+        <span class="label">Seleções mais avançadas</span>
         ${rankingList(teamRanking.slice(0, 8))}
       </div>
       <div class="card">
         <span class="label">Últimas alterações</span>
-        <div class="history-list">${recent.length ? recent.map(h => `<div><strong>${h.label}</strong><span>${new Date(h.at).toLocaleString('pt-BR')}</span></div>`).join('') : '<p class="muted">Marque uma figurinha para começar o histórico.</p>'}</div>
-        <button class="ghost" id="undoBtn">Desfazer última ação</button>
+        <div class="history-list">${recent.length ? recent.map(h => `<div><strong>${h.label}</strong><span>${new Date(h.at).toLocaleString('pt-BR')}</span></div>`).join('') : '<div class="empty">Marque uma figurinha para começar o histórico.</div>'}</div>
+        <div class="button-row" style="margin-top:12px"><button class="ghost" id="undoBtn">Desfazer última ação</button><button class="ghost" data-go="mapa">Mapa visual</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="label">Faltantes em destaque</span>
+      <div class="compact-sticker-list">
+        ${highlights.map(i => `<div class="mini-sticker"><strong>${i.ref}</strong><span>${escapeHtml(i.name || i.section)}</span><span>${escapeHtml(i.section)}</span><button class="ghost" data-focus="${i.ref}">Buscar no álbum</button></div>`).join('')}
       </div>
     </div>`;
   $$('[data-go]').forEach(b => b.addEventListener('click', () => setView(b.dataset.go)));
   $('#dashQuick')?.addEventListener('click', openQuickAdd);
-  $('#dashSync')?.addEventListener('click', syncNow);
   $('#undoBtn')?.addEventListener('click', undoLast);
+  $$('[data-focus]').forEach(b => b.addEventListener('click', () => {
+    setView('album');
+    setTimeout(() => {
+      const input = $('#searchInput');
+      if (input) { input.value = b.dataset.focus; input.dispatchEvent(new Event('input')); input.focus(); }
+    }, 40);
+  }));
 }
 
 function renderAlbum(){
@@ -533,21 +552,22 @@ function renderAlbum(){
   const acervoFisico = Number.isFinite(Number(s.physical)) ? Number(s.physical) : tenhoFigurinhas + repetidasFigurinhas;
   const progressoAlbum = totalFigurinhas ? tenhoFigurinhas / totalFigurinhas : 0;
   $('#album').innerHTML = `
-    <div class="album-hero album-hero-compact album-hero-total premium-hero" aria-label="Resumo do álbum">
-      <div class="album-hero-main">
+    <div class="hero-cover album-hero premium-hero" aria-label="Resumo do álbum">
+      <div>
         <span class="label">Meu álbum da Copa</span>
-        <h3>${tenhoFigurinhas}/${totalFigurinhas} coladas</h3>
-        <p class="hero-subline">${tenhoFigurinhas} no álbum + ${repetidasFigurinhas} repetidas = ${acervoFisico} no acervo.</p>
+        <h2>${tenhoFigurinhas}/${totalFigurinhas} coladas</h2>
+        <p class="hero-subline">${tenhoFigurinhas} no álbum · ${repetidasFigurinhas} repetidas · ${acervoFisico} figurinhas físicas no acervo.</p>
       </div>
-      <div class="album-hero-status summary-only">
-        <span><b>${pct(progressoAlbum)}</b> completo</span>
-        <span><b>${faltantesFigurinhas}</b> faltantes</span>
-        <span><b>${repetidasFigurinhas}</b> repetidas</span>
-        <span><b>${acervoFisico}</b> total no acervo</span>
-      </div>
+      <div class="hero-ring"><div><strong>${pct(progressoAlbum)}</strong><span>completo</span></div></div>
+    </div>
+    <div class="grid kpi-grid">
+      ${kpi('Faltantes', faltantesFigurinhas)}
+      ${kpi('Repetidas', repetidasFigurinhas)}
+      ${kpi('Total físico', acervoFisico)}
+      ${kpi('Seleções completas', stats().completeTeams)}
     </div>
     <div class="filters album-filters">
-      <input id="searchInput" type="search" placeholder="Buscar por número, seleção, nome ou status..." />
+      <input id="searchInput" type="search" placeholder="Buscar por código, seleção, nome ou status..." />
       <select id="groupFilter"><option value="">Todos os grupos</option>${groups.map(g=>`<option value="${g}">Grupo ${g}</option>`).join('')}<option value="EXTRAS">Extras</option></select>
       <select id="statusFilter"><option value="">Todos status</option><option value="missing">Faltantes</option><option value="owned">Tenho</option><option value="duplicate">Repetidas</option><option value="reserved">Trocas/reservas</option></select>
       <button class="ghost" id="clearFilters">Limpar</button>
@@ -560,16 +580,20 @@ function renderAlbum(){
         <button data-chip="duplicate" class="chip">Repetidas</button>
         <button data-chip="reserved" class="chip">Trocas</button>
       </div>
-      <button class="ghost view-toggle" id="albumMapBtn">Visualização: Mapa</button>
+      <div class="button-row">
+        <button class="ghost view-toggle" id="albumMapBtn">Mapa</button>
+        <button class="ghost view-toggle" id="albumListsBtn">Listas</button>
+      </div>
     </div>
-    <div class="helper-card album-helper">Toque em <strong>+</strong> para adicionar e em <strong>-</strong> para remover. Clique no centro da figurinha para alternar entre 0 e 1.</div>
+    <div class="card helper-card album-helper">Toque em <strong>+</strong> para adicionar, em <strong>−</strong> para remover e no centro da figurinha para alternar rapidamente entre 0 e 1.</div>
     <div id="teamList" class="team-list album-grid"></div>`;
   const sync = () => renderTeamList();
   $('#searchInput').addEventListener('input', sync);
   $('#groupFilter').addEventListener('change', sync);
   $('#statusFilter').addEventListener('change', () => { updateFilterChips(); sync(); });
   $('#clearFilters').addEventListener('click', () => { $('#searchInput').value=''; $('#groupFilter').value=''; $('#statusFilter').value=''; updateFilterChips(); sync(); });
-  $("#albumMapBtn")?.addEventListener("click", () => setView("mapa"));
+  $('#albumMapBtn')?.addEventListener('click', () => setView('mapa'));
+  $('#albumListsBtn')?.addEventListener('click', () => setView('listas'));
   $$('.chip').forEach(btn => btn.addEventListener('click', () => { $('#statusFilter').value = btn.dataset.chip; updateFilterChips(); sync(); }));
   renderTeamList();
 }
@@ -609,23 +633,39 @@ function stickerButton(item){
   const st = statusLabel(item);
   const displayName = item.name || item.section;
   const typeLabel = stickerTypeLabel(item.type);
-  const showMeta = item.type && item.type !== 'jogador';
-  const rarityClass = item.number === 1 ? 'rarity-silver' : item.number === 13 ? 'rarity-gold' : 'rarity-base';
+  const code = codeOf(item);
+  const n = String(item.number).padStart(2, '0');
+  const rarityClass = item.number === 1 ? 'rarity-silver' : item.number === 13 ? 'rarity-gold' : item.type === 'especial' ? 'rarity-gold' : 'rarity-base';
   const stateClass = q > 1 ? 'state-duplicate' : q === 1 ? 'state-owned' : 'state-missing';
-  const statusText = q > 1 ? `Rep. +${q-1}` : (q === 1 ? 'Tenho' : 'Falta');
-  return `<div class="sticker sticker-card-v10 ${rarityClass} ${stateClass} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
-    <button class="sticker-main sticker-face" data-open="${item.id}">
-      <span class="sticker-plate sticker-plate-top">
-        <span class="sticker-code">${escapeHtml(codeOf(item))}</span>
-        <span class="sticker-number">${escapeHtml(String(item.number))}</span>
+  const statusText = q > 1 ? `REPETIDA +${q-1}` : (q === 1 ? 'TENHO' : 'FALTA');
+  const isSpecial = item.type && item.type !== 'jogador';
+  const initials = (displayName || code).split(/\s+|\/+/).filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+
+  return `<div class="sticker sticker-card-v12 ${rarityClass} ${stateClass} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
+    <button class="sticker-main sticker-face-v12" data-open="${item.id}" aria-label="${escapeAttr(`${item.ref} ${displayName}`)}">
+      <span class="sticker-status-v12 ${stateClass}">${statusText}</span>
+
+      <span class="sticker-top-v12">
+        <span class="sticker-code-v12">${escapeHtml(code)}</span>
+        <span class="sticker-number-v12">${escapeHtml(n)}</span>
       </span>
-      <span class="sticker-plate sticker-plate-bottom">
-        <strong class="sticker-name">${escapeHtml(displayName)}</strong>
-        ${showMeta ? `<span class="sticker-meta">${escapeHtml(typeLabel)}</span>` : ''}
+
+      <span class="sticker-art-v12">
+        <span class="sticker-art-glow"></span>
+        <span class="sticker-emblem-v12">${isSpecial ? '★' : initials}</span>
       </span>
-      <span class="sticker-status ${stateClass}">${statusText}</span>
+
+      <span class="sticker-bottom-v12">
+        <strong class="sticker-name-v12">${escapeHtml(displayName)}</strong>
+        <span class="sticker-meta-v12">${escapeHtml(typeLabel)} · ${escapeHtml(item.section)}</span>
+      </span>
     </button>
-    <div class="qty-row"><button class="qty-btn dec" data-dec="${item.id}" aria-label="Remover">−</button><b>${q}</b><button class="qty-btn inc" data-inc="${item.id}" aria-label="Adicionar">+</button></div>
+
+    <div class="qty-row qty-row-v12">
+      <button class="qty-btn dec" data-dec="${item.id}" aria-label="Remover ${escapeAttr(item.ref)}">−</button>
+      <b>${q}</b>
+      <button class="qty-btn inc" data-inc="${item.id}" aria-label="Adicionar ${escapeAttr(item.ref)}">+</button>
+    </div>
   </div>`;
 }
 function stickerTypeLabel(type){
@@ -677,13 +717,40 @@ function renderTrades(){
   const rows = albumItems.filter(i => quantity(i.id) > 1 || state.tradeStatus[i.id]).sort((a,b)=>a.order-b.order);
   const dupText = formatList(i => quantity(i.id) > 1, 'dup');
   const missingText = formatList(i => quantity(i.id) === 0);
-  $('#trocas').innerHTML = `<div class="grid panel-grid"><div class="card"><span class="label">Resumo para WhatsApp</span><p class="muted">Use para trocar com amigos.</p><div class="button-row"><button class="primary" id="copyTradeText">Copiar repetidas</button><button class="ghost" id="copyNeedText">Copiar faltantes</button></div></div><div class="card"><span class="label">Repetidas disponíveis</span><h3>${stats().duplicates}</h3><p>Total de figurinhas extras no acervo.</p></div></div><div class="table-wrap"><table><thead><tr><th>Figurinha</th><th>Seleção/seção</th><th>Qtd</th><th>Repetidas</th><th>Status troca</th><th>Contato</th><th>Obs.</th></tr></thead><tbody>${rows.map(i => `<tr><td><strong>${i.ref}</strong><br><span class="muted">${escapeHtml(i.name || '')}</span></td><td>${i.section}</td><td><input type="number" min="0" value="${quantity(i.id)}" data-q="${i.id}" style="width:82px"></td><td>${extrasOf(i)}</td><td><select data-trade="${i.id}"><option></option>${['Disponível','Reservada','Trocada','Aguardando'].map(v=>`<option ${state.tradeStatus[i.id]===v?'selected':''}>${v}</option>`).join('')}</select></td><td><input value="${escapeAttr(state.contacts[i.id]||'')}" data-contact="${i.id}" placeholder="Nome/WhatsApp"></td><td><input value="${escapeAttr(state.notes[i.id]||'')}" data-note="${i.id}" placeholder="Observação"></td></tr>`).join('') || `<tr><td colspan="7" class="empty">Quando marcar repetidas, elas aparecem aqui.</td></tr>`}</tbody></table></div>`;
+  $('#trocas').innerHTML = `
+    <div class="grid kpi-grid">
+      ${kpi('Repetidas', stats().duplicates, 'para negociar')}
+      ${kpi('Itens em troca', rows.length, 'anúncios ativos')}
+      ${kpi('Faltantes', stats().missing, 'da coleção')}
+      ${kpi('Total físico', stats().physical, 'acervo inteiro')}
+    </div>
+    <div class="grid panel-grid">
+      <div class="card">
+        <span class="label">Resumo para WhatsApp</span>
+        <p class="trade-help">Copie rapidamente sua lista para mandar para amigos e grupos.</p>
+        <div class="button-row"><button class="primary" id="copyTradeText">Copiar repetidas</button><button class="ghost" id="copyNeedText">Copiar faltantes</button></div>
+      </div>
+      <div class="card">
+        <span class="label">Atalhos</span>
+        <div class="quick-actions-grid">
+          <button class="action-tile" data-go="album">Abrir álbum</button>
+          <button class="action-tile" data-go="adicionar">Lançar figurinhas</button>
+          <button class="action-tile" data-go="listas">Listas rápidas</button>
+          <button class="action-tile" id="dashQuick">Marcar figurinha</button>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Figurinha</th><th>Seleção/seção</th><th>Qtd</th><th>Repetidas</th><th>Status troca</th><th>Contato</th><th>Obs.</th></tr></thead><tbody>${rows.map(i => `<tr><td><strong>${i.ref}</strong><br><span class="muted">${escapeHtml(i.name || '')}</span></td><td>${i.section}</td><td><input type="number" min="0" value="${quantity(i.id)}" data-q="${i.id}" style="width:82px"></td><td>${extrasOf(i)}</td><td><select data-trade="${i.id}"><option></option>${['Disponível','Reservada','Trocada','Aguardando'].map(v=>`<option ${state.tradeStatus[i.id]===v?'selected':''}>${v}</option>`).join('')}</select></td><td><input value="${escapeAttr(state.contacts[i.id]||'')}" data-contact="${i.id}" placeholder="Nome/WhatsApp"></td><td><input value="${escapeAttr(state.notes[i.id]||'')}" data-note="${i.id}" placeholder="Observação"></td></tr>`).join('') || `<tr><td colspan="7" class="empty">Quando marcar repetidas, elas aparecem aqui.</td></tr>`}</tbody></table></div>`;
+  $$('[data-go]').forEach(b => b.addEventListener('click', () => setView(b.dataset.go)));
+  $('#dashQuick')?.addEventListener('click', openQuickAdd);
   $$('[data-q]').forEach(el => el.addEventListener('change', () => setQuantity(el.dataset.q, el.value, `${itemById(el.dataset.q).ref} ajustada`)));
   $$('[data-trade]').forEach(el => el.addEventListener('change', () => { state.tradeStatus[el.dataset.trade] = el.value; saveState(); toast('Troca atualizada.'); render(); }));
   $$('[data-contact]').forEach(el => el.addEventListener('change', () => { state.contacts[el.dataset.contact] = el.value; saveState(); }));
   $$('[data-note]').forEach(el => el.addEventListener('change', () => { state.notes[el.dataset.note] = el.value; saveState(); }));
-  $('#copyTradeText')?.addEventListener('click', () => copyText(`Repetidas:\n${dupText}`));
-  $('#copyNeedText')?.addEventListener('click', () => copyText(`Faltantes:\n${missingText}`));
+  $('#copyTradeText')?.addEventListener('click', () => copyText(`Repetidas:
+${dupText}`));
+  $('#copyNeedText')?.addEventListener('click', () => copyText(`Faltantes:
+${missingText}`));
 }
 
 function renderConfig(){
@@ -841,7 +908,7 @@ function initCloud(){
       }
       render();
     });
-  } catch(e){ setSync('error','Erro na nuvem', e.message || 'Falha ao iniciar Firebase.'); }
+  } catch(e){ console.warn('Cloud init failed', e); setSync('error','Erro na nuvem', e.message || 'Falha ao iniciar Firebase.'); }
 }
 function normalizeFamilyCode(value){
   return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'').replace(/^FAM?-/,'FAM-').slice(0, 12);
@@ -900,6 +967,7 @@ function startCloudListener(){
     cloud.lastSyncAt = new Date();
     setSync('ok', 'Sincronizado', familyCode ? `Família ${familyCode}` : 'Coleção pessoal atualizada.');
   }, e => {
+    console.warn(e);
     setSync('error','Erro na nuvem', e.message || 'Falha ao acompanhar coleção.');
   });
 }
@@ -913,7 +981,7 @@ function queueCloudSave(){
 async function signInCloud(){
   if (!cloud.ready) return toast('Nuvem ainda não configurada.');
   try { await cloud.auth.signInWithPopup(cloud.provider); toast('Conta conectada.'); }
-  catch(e){ toast(`Não consegui entrar: ${e.code || 'erro'}`); }
+  catch(e){ toast(`Não consegui entrar: ${e.code || 'erro'}`); console.warn(e); }
 }
 async function signOutCloud(){
   if (!cloud.ready) return toast('Nuvem não configurada.');
@@ -940,7 +1008,7 @@ async function saveCloud(showToast = true){
     cloud.lastSyncAt = new Date();
     setSync('ok','Sincronizado', familyCode ? `Família ${familyCode}` : 'Alterações salvas na nuvem.');
     if (showToast) toast('Sincronizado.');
-  } catch(e){ setSync('error','Erro ao sincronizar', e.message || 'Falha ao salvar.'); if (showToast) toast('Erro ao sincronizar.'); }
+  } catch(e){ setSync('error','Erro ao sincronizar', e.message || 'Falha ao salvar.'); if (showToast) toast('Erro ao sincronizar.'); console.warn(e); }
 }
 async function loadCloud(showToast = true, options = {}){
   const doc = cloudDoc();
@@ -983,7 +1051,7 @@ async function loadCloud(showToast = true, options = {}){
     cloud.lastSyncAt = new Date();
     setSync('ok','Sincronizado', familyCode ? `Família ${familyCode}` : 'Dados atualizados.');
     return true;
-  } catch(e){ setSync('error','Erro ao sincronizar', e.message || 'Falha ao carregar.'); if (showToast) toast('Erro ao sincronizar.'); return false; }
+  } catch(e){ setSync('error','Erro ao sincronizar', e.message || 'Falha ao carregar.'); if (showToast) toast('Erro ao sincronizar.'); console.warn(e); return false; }
 }
 async function syncNow(showToast = true){
   if (!cloud.user) return showToast && toast('Entre com Google para sincronizar.');
@@ -1115,7 +1183,7 @@ function renderAdicionar(){
       <div class="card add-hero-card premium-add-card">
         <span class="label">Modo pacotinho</span>
         <h3>Adicionar figurinhas</h3>
-        <p>Digite o código do verso da figurinha. Aceita formatos como <strong>HAI 8</strong>, <strong>HAI08</strong>, <strong>FWC 1</strong>, <strong>COC 1</strong> . Depois é só confirmar com <strong>+1</strong>.</p>
+        <p>Digite o código do verso da figurinha. O app aceita formatos como <strong>HAI 8</strong>, <strong>HAI08</strong>, <strong>FWC 1</strong>, <strong>COC 1</strong> e <strong>00</strong>. Depois é só confirmar com <strong>+1</strong>.</p>
         <div class="add-input-row">
           <input id="addCodeInput" type="search" inputmode="text" autocomplete="off" placeholder="Digite o código: HAI 8" />
           <button class="primary" id="addFindBtn">Buscar</button>
@@ -1139,10 +1207,6 @@ function renderAdicionar(){
         <div class="button-row">
           <button class="ghost" id="undoPackBtn">Desfazer última ação</button>
           <button class="ghost" id="clearPackBtn">Limpar lista</button>
-        </div>
-      </div>
-          <div><strong>1</strong><span>Tenho</span></div>
-          <div><strong>2+</strong><span>Repetida</span></div>
         </div>
       </div>
     </div>`;
@@ -1212,7 +1276,8 @@ window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); defe
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 initCloud();
 updateChrome();
-renderAlbum();function animateQtyButton(btn){
+render();
+function animateQtyButton(btn){
   if(!btn) return;
   btn.classList.remove('press-pop');
   void btn.offsetWidth;
