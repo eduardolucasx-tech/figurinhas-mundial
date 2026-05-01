@@ -25,3 +25,10 @@ Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel public
 - A mesclagem preserva a maior quantidade de cada figurinha para evitar perda de figurinhas marcadas offline.
 - Se a coleção da nuvem ainda não existir, o estado local é enviado automaticamente no login.
 - Mantido layout horizontal no desktop e ajuste mobile.
+
+
+## v0.11.2
+- Layout das figurinhas refeito com base cinza/branca uniforme, como um PNG, mas com textos editáveis por HTML.
+- Corrigida a deformação das figurinhas repetidas: repetida, faltante, tenho, prata e dourada usam a mesma estrutura.
+- Centralização dos textos internos da figurinha reforçada.
+- Banner das seleções ajustado para evitar nome desalinhado e sobreposição com as informações.

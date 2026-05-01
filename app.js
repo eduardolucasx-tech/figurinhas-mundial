@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.11.0-merge-local-cloud';
+const THEME_VERSION = '0.11.2-sticker-layout-reset';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -204,9 +204,7 @@ function sectionVisual(sec, st){
         <span class="badge banner-group">${groupLabel}</span>
         <strong class="banner-count">${totalLabel}</strong>
       </div>
-      <div class="banner-title-row">
-        <h3>${escapeHtml(codeOf(sec))} · ${escapeHtml(sec.name)}</h3>
-      </div>
+      <h3 class="banner-title">${escapeHtml(codeOf(sec))} · ${escapeHtml(sec.name)}</h3>
       <div class="banner-subline">${totalLabel} figurinhas · ${pct(st.progress)}</div>
       <div class="banner-stats">
         <span>${st.missing} faltam</span>
@@ -606,7 +604,6 @@ function stickerButton(item){
   const showMeta = item.type && item.type !== 'jogador';
   const rarityClass = item.number === 1 ? 'rarity-silver' : item.number === 13 ? 'rarity-gold' : 'rarity-base';
   const stateClass = q > 1 ? 'state-duplicate' : q === 1 ? 'state-owned' : 'state-missing';
-  const cornerText = '';
   const statusText = q > 1 ? `Rep. +${q-1}` : (q === 1 ? 'Tenho' : 'Falta');
   return `<div class="sticker sticker-card-v10 ${rarityClass} ${stateClass} type-${escapeAttr(item.type || 'figurinha')}" title="${escapeAttr(`${item.ref} · ${displayName} · ${st}`)}">
     <button class="sticker-main sticker-face" data-open="${item.id}">
@@ -618,7 +615,6 @@ function stickerButton(item){
         <strong class="sticker-name">${escapeHtml(displayName)}</strong>
         ${showMeta ? `<span class="sticker-meta">${escapeHtml(typeLabel)}</span>` : ''}
       </span>
-      <span class="sticker-corner ${stateClass}">${cornerText}</span>
       <span class="sticker-status ${stateClass}">${statusText}</span>
     </button>
     <div class="qty-row"><button class="qty-btn dec" data-dec="${item.id}" aria-label="Remover">−</button><b>${q}</b><button class="qty-btn inc" data-inc="${item.id}" aria-label="Adicionar">+</button></div>
