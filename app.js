@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'checklist-mundial-state-v6';
-const THEME_VERSION = '0.11.0-merge-local-cloud';
+const THEME_VERSION = '0.11.1-banner-layout-fix';
 const LEGACY_KEYS = ['checklist-mundial-state-v3', 'checklist-mundial-state-v2'];
 const CLOUD_COLLECTION = 'checklist_mundial_users';
 const FAMILY_COLLECTION = 'checklist_mundial_families';
@@ -195,6 +195,26 @@ function bannerThemeStyle(code){
 }
 function sectionVisual(sec){
   return `<div class="section-visual" style="${bannerThemeStyle(sec.code)}"><span class="flag-badge" aria-hidden="true">${flagOf(sec.code)}</span><span class="visual-ball">⚽</span><i></i><b></b></div>`;
+}
+function teamBanner(sec, st){
+  return `<div class="section-visual team-banner" style="${bannerThemeStyle(sec.code)}">
+    <span class="flag-badge" aria-hidden="true">${flagOf(sec.code)}</span>
+    <div class="team-banner-content">
+      <div class="team-banner-topline">
+        <span class="badge">${sec.group === 'EXTRAS' ? 'Extras' : `Grupo ${sec.group}`}</span>
+        <strong class="team-banner-count">${st.owned}/${st.total}</strong>
+      </div>
+      <div class="team-banner-title">${codeOf(sec)} · ${sec.name}</div>
+      <div class="team-banner-meta">${st.owned}/${st.total} figurinhas · ${pct(st.progress)}</div>
+      <div class="team-banner-stats">
+        <span>${st.missing} faltam</span>
+        <span>${st.duplicates} repetidas</span>
+        <span>${st.physical} físicas</span>
+      </div>
+    </div>
+    <span class="visual-ball">⚽</span>
+    <i></i><b></b>
+  </div>`;
 }
 
 function codeOf(obj){ return obj.displayCode || obj.code; }
@@ -498,7 +518,7 @@ function renderDashboard(){
 function renderAlbum(){
   const groups = [...new Set(window.ALBUM_DATA.teams.map(t => t.group))];
   const s = stats();
-  const totalFigurinhas = Number(window.ALBUM_DATA.total || s.total || 994);
+  const totalFigurinhas = Number(albumItems.length || s.total || 994);
   const tenhoFigurinhas = Number.isFinite(Number(s.owned)) ? Number(s.owned) : 0;
   const faltantesFigurinhas = Number.isFinite(Number(s.missing)) ? Number(s.missing) : Math.max(0, totalFigurinhas - tenhoFigurinhas);
   const repetidasFigurinhas = Number.isFinite(Number(s.duplicates)) ? Number(s.duplicates) : 0;
@@ -561,10 +581,7 @@ function renderTeamList(){
     const st = sectionStats(sec);
     return `<article class="team-card album-team premium-team ${st.progress === 1 ? 'complete' : ''} ${st.progress >= .75 ? 'almost' : st.progress <= .25 ? 'low' : 'mid'}">
       <div class="premium-team-top">
-        ${sectionVisual(sec)}
-        <div class="team-head"><div><span class="badge">${sec.group === 'EXTRAS' ? 'Extras' : `Grupo ${sec.group}`}</span><h3><span class="team-flag" aria-hidden="true">${flagOf(sec.code)}</span>${codeOf(sec)} · ${sec.name}</h3><p>${st.owned}/${st.total} figurinhas · ${pct(st.progress)}</p></div><strong>${st.owned}/${st.total}</strong></div>
-        <div class="progress-track muted-track"><span class="progress-fill" style="width:${pct(st.progress)}"></span></div>
-        <div class="team-mini-stats"><span>${st.missing} faltam</span><span>${st.duplicates} repetidas</span><span>${st.physical} físicas</span></div>
+        ${teamBanner(sec, st)}
       </div>
       ${st.progress === 1 ? '<div class="complete-ribbon">Completa</div>' : ''}
       <div class="sticker-grid">${items.map(stickerButton).join('')}</div>

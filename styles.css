@@ -715,3 +715,174 @@ body:before{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+
+/* v0.11.1 — banner info inside horizontal header + sticker centering fixes */
+.premium-team{
+  background:rgba(255,250,240,.94);
+}
+.premium-team .premium-team-top{
+  padding:12px 14px 0;
+}
+.premium-team .section-visual.team-banner{
+  min-height:148px;
+  margin-bottom:12px;
+}
+.premium-team .team-banner-content{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:8px;
+  padding:16px 18px 16px 90px;
+  color:#fff;
+}
+.premium-team .team-banner-topline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.premium-team .team-banner .badge{
+  background:rgba(255,255,255,.88);
+  color:#0b3b8f;
+  backdrop-filter:blur(6px);
+}
+.premium-team .team-banner-count{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:64px;
+  padding:8px 12px;
+  border-radius:16px;
+  background:#061a46;
+  color:#fff;
+  font-weight:900;
+  font-size:26px;
+  line-height:1;
+}
+.premium-team .team-banner-title{
+  font-size:34px;
+  font-weight:900;
+  line-height:1.02;
+  letter-spacing:-.03em;
+  text-shadow:0 2px 10px rgba(0,0,0,.20);
+}
+.premium-team .team-banner-meta{
+  font-size:18px;
+  font-weight:800;
+  color:rgba(255,255,255,.92);
+}
+.premium-team .team-banner-stats{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.premium-team .team-banner-stats span{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:13px;
+  font-weight:900;
+  background:rgba(255,248,230,.92);
+  color:#243240;
+  box-shadow:0 8px 18px rgba(5,23,52,.12);
+}
+.premium-team .team-banner .flag-badge{
+  left:16px;
+  top:16px;
+  width:58px;
+  height:58px;
+  border-radius:18px;
+  z-index:3;
+}
+.premium-team .team-banner .visual-ball{
+  z-index:1;
+}
+.premium-team .team-banner i,
+.premium-team .team-banner b{
+  z-index:1;
+}
+.premium-team .sticker-grid{
+  padding:0 14px 14px;
+}
+.premium-team .sticker-card-v10{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.premium-team .sticker-card-v10 .sticker-face{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:space-between;
+  gap:8px;
+}
+.premium-team .sticker-plate{
+  width:100%;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding-left:8px;
+  padding-right:8px;
+}
+.premium-team .sticker-plate-top,
+.premium-team .sticker-plate-bottom{
+  margin:0;
+}
+.premium-team .sticker-code,
+.premium-team .sticker-number,
+.premium-team .sticker-name,
+.premium-team .sticker-meta{
+  display:block;
+  width:100%;
+  text-align:center;
+}
+.premium-team .sticker-name{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.premium-team .sticker-status{
+  left:10px;
+  right:10px;
+}
+@media (max-width:1200px){
+  .premium-team .team-banner-title{font-size:28px;}
+  .premium-team .team-banner-meta{font-size:16px;}
+}
+@media (max-width:1060px){
+  .premium-team .section-visual.team-banner{min-height:150px;}
+  .premium-team .team-banner-content{padding:14px 16px 14px 84px;gap:7px;}
+  .premium-team .team-banner-title{font-size:26px;}
+  .premium-team .team-banner-meta{font-size:15px;}
+  .premium-team .team-banner-count{font-size:22px;min-width:60px;padding:7px 10px;}
+  .premium-team .team-banner-stats span{font-size:12px;padding:6px 9px;}
+}
+@media (max-width:760px){
+  .premium-team .premium-team-top{padding:10px 10px 0;}
+  .premium-team .section-visual.team-banner{min-height:144px;border-radius:18px;}
+  .premium-team .team-banner-content{padding:12px 12px 12px 78px;gap:6px;}
+  .premium-team .team-banner-title{font-size:22px;line-height:1.04;}
+  .premium-team .team-banner-meta{font-size:13px;}
+  .premium-team .team-banner-topline{gap:8px;}
+  .premium-team .team-banner-count{font-size:18px;min-width:52px;padding:6px 8px;border-radius:14px;}
+  .premium-team .team-banner-stats{gap:6px;}
+  .premium-team .team-banner-stats span{font-size:11px;padding:5px 8px;}
+  .premium-team .team-banner .flag-badge{width:48px;height:48px;border-radius:15px;left:12px;top:12px;}
+}
+@media (max-width:420px){
+  .premium-team .section-visual.team-banner{min-height:140px;}
+  .premium-team .team-banner-content{padding:10px 10px 10px 70px;}
+  .premium-team .team-banner-title{font-size:20px;}
+  .premium-team .team-banner-meta{font-size:12px;}
+  .premium-team .team-banner .badge{font-size:10px;padding:4px 8px;}
+  .premium-team .team-banner-count{font-size:16px;min-width:48px;padding:5px 8px;}
+  .premium-team .team-banner-stats span{font-size:10px;padding:4px 7px;}
+}

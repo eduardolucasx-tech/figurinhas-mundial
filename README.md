@@ -25,3 +25,10 @@ Substitua os arquivos no GitHub, faça commit na `main`, aguarde a Vercel public
 - A mesclagem preserva a maior quantidade de cada figurinha para evitar perda de figurinhas marcadas offline.
 - Se a coleção da nuvem ainda não existir, o estado local é enviado automaticamente no login.
 - Mantido layout horizontal no desktop e ajuste mobile.
+
+
+## v0.11.1
+- Corrigido o topo horizontal de cada seleção: bandeira, código/nome, porcentagem e contadores foram movidos para dentro do banner colorido.
+- Restaurado visual do banner com cores inspiradas na bandeira de cada seleção.
+- Ajustado o layout interno das figurinhas para melhor centralização no desktop e no mobile.
+- O contador principal do álbum volta a usar o total real de 994 figurinhas.
